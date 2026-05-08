@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %} Admin Gallery — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<div class="gllry">
+
+  <!-- Page Header -->
+  <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <span class="page-label">Admin</span>
+      <h1 class="page-title">Manage <em>Gallery</em></h1>
+    </div>
+    <!-- Upload Button -->
+    <button class="scnd-btn btn" onclick="document.getElementById('uploadModal').showModal()">
+      + Upload Photo
+    </button>
+  </div>
+
+  <!-- Gallery Grid -->
+  <div class="gallery-grid" style="margin-top:32px;">
+    {% if cakes %}
+      {% for cake in cakes %}
+      <div class="gallery-item" data-category="{{ cake.category }}">
+        {% if cake.image_url %}
+          <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+        {% else %}
+          <div class="img-placeholder" style="height:200px;">
+            <span class="cake-emoji">🎂</span>
+          </div>
+        {% endif %}
+
+        <!-- Overlay -->
+        <div class="overlay">
+          <span class="overlay-tag">{{ cake.category }} • {{ '✅ Visible' if cake.is_visible else '🚫 Hidden' }}</span>
+          <span class="overlay-title">{{ cake.design_name }}</span>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <a href="{{ url_for('admin.edit_cake', cake_id=cake.cake_id) }}"
+               class="btn btn-xs btn-warning">Edit</a>
+            <form action="{{ url_for('admin.delete_cake', cake_id=cake.cake_id) }}" method="POST">
+              <button type="submit" class="btn btn-xs btn-error"
+                onclick="return confirm('Delete this cake?')">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Empty State -->
+  {% if not cakes %}
+  <div class="empty-state" style="display:block;">
+    <span>🎂</span>
+    There is no photo here yet. Stay tuned!
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Upload Modal -->
+<dialog id="uploadModal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg mb-4">Upload Cake Photo</h3>
+    <form action="{{ url_for('admin.add_cake') }}" method="POST">
+      <div class="flex flex-col gap-3">
+        <input type="text" name="design_name" placeholder="Cake name" class="input input-bordered w-full" required>
+        <textarea name="description" placeholder="Description (optional)" class="textarea textarea-bordered w-full"></textarea>
+        <select name="category" class="select select-bordered w-full" required>
+          <option value="" disabled selected>Select category</option>
+          <option value="Birthday">Birthday</option>
+          <option value="Wedding">Wedding</option>
+          <option value="Custom">Custom</option>
+          <option value="Cupcakes">Cupcakes</option>
+        </select>
+        <input type="number" name="base_price" placeholder="Base price" step="0.01" class="input input-bordered w-full" required>
+        <input type="url" name="image_url" placeholder="Image URL" class="input input-bordered w-full">
+      </div>
+      <div class="modal-action">
+        <button type="submit" class="btn scnd-btn">Upload</button>
+        <button type="button" class="btn" onclick="document.getElementById('uploadModal').close()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+{% endblock %}

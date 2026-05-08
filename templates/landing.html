@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %} Liza's Cakehouse {% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="hero-section">
+    <!-- Decorative blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="hero-container">
+        <div class="hero-left">
+            <span class="hero-tag">✦ Custom Cakes, Made With Love</span>
+            <p class="title">Baked with love,<br>served with<br>warmth.</p>
+            <p class="body-text">From birthdays to weddings, we craft custom cakes made just for you. Browse our designs, place your order, and let us handle the rest.</p>
+            <div class="hero-actions">
+                <a href="#" class="cta-btn1">Design Your Own Cake!</a>
+                <a href="{{ url_for('gallery.gallery') }}" class="cta-btn2">Browse Gallery →</a>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="hero-img-wrap">
+                <img src="{{ url_for('static', filename='images/hero-cake.png') }}" alt="Cake Image">
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-num">500+</span>
+            <span class="stat-label">Happy Customers</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Handcrafted</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+            <span class="stat-num">50+</span>
+            <span class="stat-label">Unique Designs</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+            <span class="stat-num">5★</span>
+            <span class="stat-label">Average Rating</span>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="sc2">
+    <div class="wf1-container">
+        <div class="section-header">
+            <span class="section-label">Simple & Sweet</span>
+            <h2 class="section-title">How It <em>Works</em></h2>
+            <div class="divider">
+                <span class="divider-line"></span>
+                <span class="divider-dot"></span>
+                <span class="divider-line right"></span>
+            </div>
+        </div>
+
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-icon-wrap">📋</div>
+                <div class="step-body">
+                    <span class="step-number">01</span>
+                    <h3 class="step-title">Place Your Order</h3>
+                    <p class="step-desc">Browse our menu or reach out with a custom request. Tell us your flavor, design, and occasion — we'll take it from there.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-icon-wrap">🎨</div>
+                <div class="step-body">
+                    <span class="step-number">02</span>
+                    <h3 class="step-title">We Bake & Design</h3>
+                    <p class="step-desc">Our baker gets to work crafting your cake fresh from scratch — every detail made with care, from the layers to the finishing touches.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-icon-wrap">🎉</div>
+                <div class="step-body">
+                    <span class="step-number">03</span>
+                    <h3 class="step-title">Pick Up & Celebrate</h3>
+                    <p class="step-desc">Your cake is ready right on time. Pick it up and enjoy every slice — made with love, delivered with a smile.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── WHY CHOOSE US ── -->
+<section class="sc3">
+    <div class="wf3">
+        <div class="section-header">
+            <span class="section-label">Our Promise</span>
+            <h2 class="section-title">Why Choose <em>Us?</em></h2>
+            <div class="divider">
+                <span class="divider-line"></span>
+                <span class="divider-dot"></span>
+                <span class="divider-line right"></span>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon">🎂</div>
+                <h3 class="card-title">Handcrafted with Love</h3>
+                <p class="card-desc">Every cake is made from scratch using only the finest ingredients. No shortcuts, no mixes — just pure homemade goodness baked into every layer.</p>
+                <span class="card-number">01</span>
+            </div>
+            <div class="card">
+                <div class="card-icon">✨</div>
+                <h3 class="card-title">Custom Designs</h3>
+                <p class="card-desc">From intimate birthdays to grand celebrations, we bring your vision to life. Share your idea and we'll craft a cake that's uniquely yours.</p>
+                <span class="card-number">02</span>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌸</div>
+                <h3 class="card-title">Fresh Every Order</h3>
+                <p class="card-desc">We never pre-bake in bulk. Each order is prepared fresh to ensure the best taste, texture, and presentation on your special day.</p>
+                <span class="card-number">03</span>
+            </div>
+            <div class="card">
+                <div class="card-icon">💌</div>
+                <h3 class="card-title">Heartfelt Service</h3>
+                <p class="card-desc">We treat every order like it matters — because it does. Expect warm, personal service from your first message to final delivery.</p>
+                <span class="card-number">04</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA BANNER ── -->
+<section class="cta-banner">
+    <div class="cta-banner-inner">
+        <h2>Ready to order your dream cake?</h2>
+        <p>Let's make your celebration extra special — one slice at a time.</p>
+        <a href="{{ url_for('auth.register') }}" class="cta-btn1">Get Started</a>
+    </div>
+</section>
+
+{% endblock %}

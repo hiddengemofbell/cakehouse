@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %} Gallery — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<div class="gllry" data-logged-in="{{ current_user.is_authenticated | lower }}">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <span class="page-label">Our Creations</span>
+    <h1 class="page-title">The <em>Gallery</em></h1>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-dot"></div>
+      <div class="divider-line r"></div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter</span>
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="Birthday">Birthday</button>
+    <button class="filter-btn" data-filter="Wedding">Wedding</button>
+    <button class="filter-btn" data-filter="Custom">Custom</button>
+    <button class="filter-btn" data-filter="Cupcakes">Cupcakes</button>
+  </div>
+
+  <!-- Gallery Grid -->
+  <div class="gallery-grid">
+    {% if cakes %}
+      {% for cake in cakes %}
+      <div class="gallery-item" data-category="{{ cake.category }}">
+        {% if cake.image_url %}
+          <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+        {% else %}
+          <div class="img-placeholder" style="height:200px;">
+            <span class="cake-emoji">🎂</span>
+          </div>
+        {% endif %}
+
+        <!-- Overlay -->
+        <div class="overlay">
+          <span class="overlay-tag">{{ cake.category }}</span>
+          <span class="overlay-title">{{ cake.design_name }}</span>
+        </div>
+
+        <!-- Like / Dislike -->
+        <div class="reactions">
+          <button class="react-btn like-btn" title="Like">♡</button>
+          <button class="react-btn dislike-btn" title="Dislike">✕</button>
+        </div>
+
+        <!-- Like Count -->
+        <span class="like-count">0 ♡</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" id="emptyState" {% if cakes %}style="display:none"{% endif %}>
+    <span>🎂</span>
+    There is no photo here yet. Stay tuned!
+  </div>
+
+</div>
+{% endblock %}
