@@ -1,210 +1,114 @@
 {% extends "base.html" %}
 
-{% block title %} Gallery {% endblock %}
+{% block title %} Gallery — Liza's Cakehouse {% endblock %}
 
-{% block content%}
+{% block content %}
 <section class="gllry">
-      <!-- Page Header -->
-  <div class="page-header">
+
+  <!-- Page Header -->
+  <header class="page-header">
     <span class="page-label">Our Creations</span>
     <h1 class="page-title">The <em>Gallery</em></h1>
-    <div class="divider">
+    <div class="divider" aria-hidden="true">
       <span class="divider-line"></span>
       <span class="divider-dot"></span>
       <span class="divider-line r"></span>
     </div>
-  </div>
- 
+  </header>
+
   <!-- Filter Bar -->
-  <div class="filter-bar">
-    <span class="filter-label">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+  <nav class="filter-bar" aria-label="Gallery filter">
+    <span class="filter-label" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
       Filter
     </span>
     <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="birthday">Birthday</button>
-    <button class="filter-btn" data-filter="wedding">Wedding</button>
-    <button class="filter-btn" data-filter="cupcakes">Cupcakes</button>
-    <button class="filter-btn" data-filter="custom">Custom</button>
-  </div>
- 
-  <!-- Gallery -->
-  <div class="gallery-grid" id="gallery">
- 
-    <!-- Item 1 -->
-    <div class="gallery-item" data-category="birthday">
-      <div class="img-placeholder" style="height:260px"><span class="cake-emoji">🎂</span></div>
+    {% for cat in categories %}
+    <button class="filter-btn" data-filter="{{ cat.name }}">{{ cat.name }}</button>
+    {% endfor %}
+  </nav>
+
+  <!-- Gallery Grid -->
+  <div class="gallery-grid">
+    {% for cake in cakes %}
+    <figure class="gallery-item" data-category="{{ cake.category }}">
+      {% if cake.image_url %}
+        <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+      {% else %}
+        <div class="img-placeholder" style="height:220px;">
+          <span class="cake-emoji" aria-hidden="true">🎂</span>
+        </div>
+      {% endif %}
       <div class="overlay">
-        <span class="overlay-tag">Birthday</span>
-        <span class="overlay-title">Strawberry Dream Cake</span>
+        <span class="overlay-tag">{{ cake.category }}</span>
+        <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
+        <p class="overlay-uploader">Liza's Cakehouse</p>
       </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 2 -->
-    <div class="gallery-item" data-category="wedding">
-      <div class="img-placeholder" style="height:340px"><span class="cake-emoji">💍</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Wedding</span>
-        <span class="overlay-title">Ivory Rose Tier Cake</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 3 -->
-    <div class="gallery-item" data-category="cupcakes">
-      <div class="img-placeholder" style="height:220px"><span class="cake-emoji">🧁</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Cupcakes</span>
-        <span class="overlay-title">Blush Vanilla Cupcakes</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 4 -->
-    <div class="gallery-item" data-category="custom">
-      <div class="img-placeholder" style="height:300px"><span class="cake-emoji">🌸</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Custom</span>
-        <span class="overlay-title">Floral Fantasy Cake</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 5 -->
-    <div class="gallery-item" data-category="birthday">
-      <div class="img-placeholder" style="height:200px"><span class="cake-emoji">🎉</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Birthday</span>
-        <span class="overlay-title">Confetti Celebration</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 6 -->
-    <div class="gallery-item" data-category="wedding">
-      <div class="img-placeholder" style="height:280px"><span class="cake-emoji">🤍</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Wedding</span>
-        <span class="overlay-title">Pearl White Elegance</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 7 -->
-    <div class="gallery-item" data-category="cupcakes">
-      <div class="img-placeholder" style="height:240px"><span class="cake-emoji">🍓</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Cupcakes</span>
-        <span class="overlay-title">Strawberry Swirl Cups</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 8 -->
-    <div class="gallery-item" data-category="custom">
-      <div class="img-placeholder" style="height:360px"><span class="cake-emoji">🎨</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Custom</span>
-        <span class="overlay-title">Painted Masterpiece</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 9 -->
-    <div class="gallery-item" data-category="birthday">
-      <div class="img-placeholder" style="height:290px"><span class="cake-emoji">🌈</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Birthday</span>
-        <span class="overlay-title">Rainbow Layer Cake</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 10 -->
-    <div class="gallery-item" data-category="cupcakes">
-      <div class="img-placeholder" style="height:210px"><span class="cake-emoji">🍫</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Cupcakes</span>
-        <span class="overlay-title">Dark Choco Velvet</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 11 -->
-    <div class="gallery-item" data-category="custom">
-      <div class="img-placeholder" style="height:250px"><span class="cake-emoji">🦋</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Custom</span>
-        <span class="overlay-title">Butterfly Garden Cake</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <!-- Item 12 -->
-    <div class="gallery-item" data-category="wedding">
-      <div class="img-placeholder" style="height:320px"><span class="cake-emoji">🌹</span></div>
-      <div class="overlay">
-        <span class="overlay-tag">Wedding</span>
-        <span class="overlay-title">Red Rose Romance</span>
-      </div>
-      <div class="reactions">
-        <button class="react-btn like-btn" title="Like">♡</button>
-        <button class="react-btn dislike-btn" title="Dislike">✕</button>
-      </div>
-      <span class="like-count">0 ♡</span>
-    </div>
- 
-    <div class="empty-state" id="emptyState">
-      <span>🎂</span>
-      No cakes in this category yet — check back soon!
-    </div>
- 
+    </figure>
+    {% endfor %}
   </div>
 
+  <p class="empty-state" id="emptyState" {% if cakes %}hidden{% endif %}>
+    <span aria-hidden="true">🎂</span>
+    No photos yet — check back soon!
+  </p>
+
 </section>
+
+<!-- Lightbox -->
+<dialog id="lightbox" class="lightbox-dialog" aria-label="Photo viewer">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close photo viewer">✕</button>
+  <div class="lightbox-inner">
+    <img id="lightboxImg" src="" alt="">
+    <div class="lightbox-info">
+      <span id="lightboxTag" class="overlay-tag"></span>
+      <p id="lightboxName" class="lightbox-name"></p>
+      <p class="lightbox-uploader">Liza's Cakehouse</p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  /* ── Filter ── */
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const items = document.querySelectorAll('.gallery-item');
+  const emptyState = document.getElementById('emptyState');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      let visible = 0;
+      items.forEach(item => {
+        const match = filter === 'all' || item.dataset.category === filter;
+        item.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      emptyState.hidden = visible > 0;
+    });
+  });
+
+  /* ── Lightbox ── */
+  const dialog = document.getElementById('lightbox');
+  const lbImg  = document.getElementById('lightboxImg');
+  const lbTag  = document.getElementById('lightboxTag');
+  const lbName = document.getElementById('lightboxName');
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      const img = item.querySelector('img');
+      lbImg.src  = img ? img.src : '';
+      lbImg.alt  = img ? img.alt : '';
+      lbTag.textContent  = item.querySelector('.overlay-tag').textContent;
+      lbName.textContent = item.querySelector('.overlay-title').textContent;
+      dialog.showModal();
+    });
+  });
+
+  document.getElementById('lightboxClose').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+})();
+</script>
 {% endblock %}

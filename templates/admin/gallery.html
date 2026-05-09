@@ -3,88 +3,355 @@
 {% block title %} Admin Gallery — Liza's Cakehouse {% endblock %}
 
 {% block content %}
-<div class="gllry">
+<section class="gllry">
 
   <!-- Page Header -->
-  <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+  <header class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
     <div>
       <span class="page-label">Admin</span>
       <h1 class="page-title">Manage <em>Gallery</em></h1>
     </div>
-    <!-- Upload Button -->
-    <button class="scnd-btn btn" onclick="document.getElementById('uploadModal').showModal()">
-      + Upload Photo
-    </button>
-  </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn prm-btn" onclick="document.getElementById('categoryModal').showModal()">
+        🏷 Categories
+      </button>
+      <button class="cta-btn1 btn" onclick="document.getElementById('uploadModal').showModal()">
+        + Upload Photo
+      </button>
+    </div>
+  </header>
 
-  <!-- Gallery Grid -->
-  <div class="gallery-grid" style="margin-top:32px;">
-    {% if cakes %}
-      {% for cake in cakes %}
-      <div class="gallery-item" data-category="{{ cake.category }}">
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <p class="flash-msg {{ 'flash-error' if category == 'error' else 'flash-success' }}"
+           role="alert">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- ── Pending Approvals ── -->
+  {% if pending %}
+  <div class="pending-section">
+    <h2 class="pending-title">
+      ⏳ Pending Approval
+      <span class="pending-badge">{{ pending|length }}</span>
+    </h2>
+    <div class="gallery-grid" style="margin-top:16px;">
+      {% for cake in pending %}
+      <figure class="gallery-item pending-item" data-category="{{ cake.category }}">
         {% if cake.image_url %}
           <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
         {% else %}
           <div class="img-placeholder" style="height:200px;">
-            <span class="cake-emoji">🎂</span>
+            <span class="cake-emoji" aria-hidden="true">🎂</span>
           </div>
         {% endif %}
 
-        <!-- Overlay -->
         <div class="overlay">
-          <span class="overlay-tag">{{ cake.category }} • {{ '✅ Visible' if cake.is_visible else '🚫 Hidden' }}</span>
-          <span class="overlay-title">{{ cake.design_name }}</span>
+          <span class="overlay-tag">{{ cake.category }} &bull; 🕐 Pending</span>
+          <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
           <div style="display:flex; gap:8px; margin-top:8px;">
-            <a href="{{ url_for('admin.edit_cake', cake_id=cake.cake_id) }}"
-               class="btn btn-xs btn-warning">Edit</a>
-            <form action="{{ url_for('admin.delete_cake', cake_id=cake.cake_id) }}" method="POST">
+            <form action="{{ url_for('admin.approve_cake', cake_id=cake.cake_id) }}" method="POST">
+              <button type="submit" class="btn btn-xs btn-success">✓ Approve</button>
+            </form>
+            <form action="{{ url_for('admin.reject_cake', cake_id=cake.cake_id) }}" method="POST">
               <button type="submit" class="btn btn-xs btn-error"
-                onclick="return confirm('Delete this cake?')">Delete</button>
+                onclick="return confirm('Reject and delete this photo?')">✕ Reject</button>
             </form>
           </div>
         </div>
-      </div>
+      </figure>
       {% endfor %}
-    {% endif %}
-  </div>
-
-  <!-- Empty State -->
-  {% if not cakes %}
-  <div class="empty-state" style="display:block;">
-    <span>🎂</span>
-    There is no photo here yet. Stay tuned!
+    </div>
   </div>
   {% endif %}
 
-</div>
+  <!-- ── Approved Gallery ── -->
+  <div class="approved-section {% if pending %}has-pending{% endif %}">
+    {% if pending %}
+      <h2 class="pending-title" style="margin-bottom:16px;">✅ Published Photos</h2>
+    {% endif %}
+
+    <nav class="filter-bar" aria-label="Gallery filter">
+      <span class="filter-label" aria-hidden="true">Filter</span>
+      <button class="filter-btn active" data-filter="all">All</button>
+      {% for cat in categories %}
+      <button class="filter-btn" data-filter="{{ cat.name }}">{{ cat.name }}</button>
+      {% endfor %}
+    </nav>
+
+    <div class="gallery-grid" id="approvedGrid" style="margin-top:16px;">
+      {% for cake in cakes %}
+      <figure class="gallery-item" data-category="{{ cake.category }}">
+        {% if cake.image_url %}
+          <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+        {% else %}
+          <div class="img-placeholder" style="height:200px;">
+            <span class="cake-emoji" aria-hidden="true">🎂</span>
+          </div>
+        {% endif %}
+
+        <div class="overlay">
+          <span class="overlay-tag">{{ cake.category }} &bull; {{ '✅ Visible' if cake.is_visible else '🚫 Hidden' }}</span>
+          <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button class="btn btn-xs btn-warning edit-btn"
+                    data-id="{{ cake.cake_id }}"
+                    data-name="{{ cake.design_name|e }}"
+                    data-desc="{{ cake.description|e if cake.description else '' }}"
+                    data-cat="{{ cake.category }}"
+                    data-img="{{ cake.image_url if cake.image_url else '' }}"
+                    data-visible="{{ cake.is_visible|lower }}">
+              Edit
+            </button>
+            <form action="{{ url_for('admin.delete_cake', cake_id=cake.cake_id) }}" method="POST">
+              <button type="submit" class="btn btn-xs btn-error"
+                onclick="return confirm('Delete this photo?')">Delete</button>
+            </form>
+          </div>
+        </div>
+      </figure>
+      {% endfor %}
+    </div>
+
+    <p class="empty-state" id="emptyState" {% if cakes %}hidden{% endif %}>
+      <span aria-hidden="true">🎂</span>
+      No published photos yet.
+    </p>
+  </div>
+
+</section>
+
+<!-- Manage Categories Modal -->
+<dialog id="categoryModal" class="modal" aria-labelledby="categoryModalTitle">
+  <div class="modal-box">
+    <h2 id="categoryModalTitle" class="font-bold text-lg mb-4">Manage Categories</h2>
+
+    <ul class="cat-list">
+      {% for cat in categories %}
+      <li class="cat-list-item">
+        <span>{{ cat.name }}</span>
+        <form action="{{ url_for('admin.delete_category', category_id=cat.category_id) }}" method="POST">
+          <button type="submit" class="cat-delete-btn"
+                  onclick="return confirm('Delete \'{{ cat.name }}\'? Existing photos keep their label.')">
+            ✕
+          </button>
+        </form>
+      </li>
+      {% else %}
+      <li style="color:var(--text-muted);font-size:13px;">No categories yet.</li>
+      {% endfor %}
+    </ul>
+
+    <form action="{{ url_for('admin.add_category') }}" method="POST" class="cat-add-form">
+      <input type="text" name="name" placeholder="New category name…"
+             class="input input-bordered" required style="flex:1;">
+      <button type="submit" class="btn scnd-btn">Add</button>
+    </form>
+
+    <div class="modal-action">
+      <button type="button" class="btn"
+              onclick="document.getElementById('categoryModal').close()">Close</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
 
 <!-- Upload Modal -->
-<dialog id="uploadModal" class="modal">
+<dialog id="uploadModal" class="modal" aria-labelledby="uploadModalTitle">
   <div class="modal-box">
-    <h3 class="font-bold text-lg mb-4">Upload Cake Photo</h3>
-    <form action="{{ url_for('admin.add_cake') }}" method="POST">
+    <h2 id="uploadModalTitle" class="font-bold text-lg mb-4">Upload Cake Photo</h2>
+    <form action="{{ url_for('admin.add_cake') }}" method="POST" enctype="multipart/form-data">
       <div class="flex flex-col gap-3">
-        <input type="text" name="design_name" placeholder="Cake name" class="input input-bordered w-full" required>
-        <textarea name="description" placeholder="Description (optional)" class="textarea textarea-bordered w-full"></textarea>
-        <select name="category" class="select select-bordered w-full" required>
+        <label for="design_name" class="sr-only">Cake name</label>
+        <input type="text" id="design_name" name="design_name" placeholder="Cake name"
+               class="input input-bordered w-full" required>
+
+        <label for="description" class="sr-only">Description</label>
+        <textarea id="description" name="description" placeholder="Description (optional)"
+                  class="textarea textarea-bordered w-full"></textarea>
+
+        <label for="up_category" class="sr-only">Category</label>
+        <select id="up_category" name="category" class="select select-bordered w-full"
+                required onchange="toggleNewCat(this, 'up_new_cat')">
           <option value="" disabled selected>Select category</option>
-          <option value="Birthday">Birthday</option>
-          <option value="Wedding">Wedding</option>
-          <option value="Custom">Custom</option>
-          <option value="Cupcakes">Cupcakes</option>
+          {% for cat in categories %}
+          <option value="{{ cat.name }}">{{ cat.name }}</option>
+          {% endfor %}
+          <option value="__new__">+ Add Category</option>
         </select>
-        <input type="number" name="base_price" placeholder="Base price" step="0.01" class="input input-bordered w-full" required>
-        <input type="url" name="image_url" placeholder="Image URL" class="input input-bordered w-full">
+        <input type="text" id="up_new_cat" placeholder="Type new category name…"
+               class="input input-bordered w-full" style="display:none;">
+
+        <label for="image" class="sr-only">Photo</label>
+        <input type="file" id="image" name="image" accept="image/*"
+               class="file-input file-input-bordered w-full" required>
       </div>
       <div class="modal-action">
         <button type="submit" class="btn scnd-btn">Upload</button>
-        <button type="button" class="btn" onclick="document.getElementById('uploadModal').close()">Cancel</button>
+        <button type="button" class="btn"
+                onclick="document.getElementById('uploadModal').close()">Cancel</button>
       </div>
     </form>
   </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
+<!-- Edit Modal -->
+<dialog id="editModal" class="modal" aria-labelledby="editModalTitle">
+  <div class="modal-box">
+    <h2 id="editModalTitle" class="font-bold text-lg mb-4">Edit Photo</h2>
+    <form id="editForm" action="" method="POST" enctype="multipart/form-data">
+      <div class="flex flex-col gap-3">
+
+        <!-- Current image preview -->
+        <div id="edit_preview_wrap" style="display:none;">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Current photo</p>
+          <img id="edit_preview" src="" alt="Current photo"
+               style="width:100%;max-height:160px;object-fit:cover;border-radius:12px;">
+        </div>
+
+        <label for="edit_design_name" class="sr-only">Cake name</label>
+        <input type="text" id="edit_design_name" name="design_name" placeholder="Cake name"
+               class="input input-bordered w-full" required>
+
+        <label for="edit_description" class="sr-only">Description</label>
+        <textarea id="edit_description" name="description" placeholder="Description (optional)"
+                  class="textarea textarea-bordered w-full"></textarea>
+
+        <label for="edit_category" class="sr-only">Category</label>
+        <select id="edit_category" name="category" class="select select-bordered w-full"
+                required onchange="toggleNewCat(this, 'edit_new_cat')">
+          {% for cat in categories %}
+          <option value="{{ cat.name }}">{{ cat.name }}</option>
+          {% endfor %}
+          <option value="__new__">+ Add Category</option>
+        </select>
+        <input type="text" id="edit_new_cat" placeholder="Type new category name…"
+               class="input input-bordered w-full" style="display:none;">
+
+        <div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">
+            Replace photo <span style="font-style:italic;">(optional — leave blank to keep current)</span>
+          </p>
+          <label for="edit_image" class="sr-only">Replace photo</label>
+          <input type="file" id="edit_image" name="image" accept="image/*"
+                 class="file-input file-input-bordered w-full">
+        </div>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="edit_is_visible" name="is_visible" class="checkbox">
+          <span>Visible to customers</span>
+        </label>
+
+      </div>
+      <div class="modal-action">
+        <button type="submit" class="btn scnd-btn">Save Changes</button>
+        <button type="button" class="btn"
+                onclick="document.getElementById('editModal').close()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<script>
+(function () {
+  /* ── Edit buttons ── */
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openEdit(
+        btn.dataset.id,
+        btn.dataset.name,
+        btn.dataset.desc,
+        btn.dataset.cat,
+        btn.dataset.img,
+        btn.dataset.visible === 'true'
+      );
+    });
+  });
+
+  /* ── Filter ── */
+  const filterBtns  = document.querySelectorAll('.filter-btn');
+  const items       = document.querySelectorAll('#approvedGrid .gallery-item');
+  const emptyState  = document.getElementById('emptyState');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      let visible = 0;
+      items.forEach(item => {
+        const match = filter === 'all' || item.dataset.category === filter;
+        item.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      emptyState.hidden = visible > 0;
+    });
+  });
+
+  /* ── Add Category toggle ──
+     When "+" is selected, hide the select name and show a text input instead.
+     The text input takes over the "category" name so the form submits the typed value.
+  */
+  window.toggleNewCat = function (select, inputId) {
+    const input = document.getElementById(inputId);
+    if (select.value === '__new__') {
+      select.removeAttribute('name');       // select won't submit
+      input.name = 'category';
+      input.style.display = 'block';
+      input.required = true;
+      input.focus();
+    } else {
+      select.name = 'category';
+      input.name = '';
+      input.style.display = 'none';
+      input.required = false;
+      input.value = '';
+    }
+  };
+
+  /* ── Edit modal ── */
+  window.openEdit = function (id, name, desc, cat, imgUrl, isVisible) {
+    document.getElementById('editForm').action = `/admin/gallery/${id}/edit`;
+    document.getElementById('edit_design_name').value  = name;
+    document.getElementById('edit_description').value  = desc;
+    // Pre-select category — if it's a known option set it, otherwise add it temporarily
+    const catSelect = document.getElementById('edit_category');
+    const knownOpts = ['Birthday', 'Wedding', 'Custom', 'Cupcakes'];
+    if (knownOpts.includes(cat)) {
+      catSelect.name = 'category';
+      catSelect.value = cat;
+      document.getElementById('edit_new_cat').style.display = 'none';
+      document.getElementById('edit_new_cat').required = false;
+    } else if (cat) {
+      // Custom category — show the text input pre-filled
+      catSelect.removeAttribute('name');
+      catSelect.value = '__new__';
+      const input = document.getElementById('edit_new_cat');
+      input.name = 'category';
+      input.value = cat;
+      input.style.display = 'block';
+      input.required = true;
+    }
+    document.getElementById('edit_is_visible').checked = isVisible;
+    document.getElementById('edit_image').value        = ''; // reset file input
+
+    // Show current image preview if one exists
+    const preview = document.getElementById('edit_preview');
+    const previewWrap = document.getElementById('edit_preview_wrap');
+    if (imgUrl) {
+      preview.src = imgUrl;
+      previewWrap.style.display = 'block';
+    } else {
+      previewWrap.style.display = 'none';
+    }
+
+    document.getElementById('editModal').showModal();
+  };
+})();
+</script>
 {% endblock %}

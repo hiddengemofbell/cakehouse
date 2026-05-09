@@ -1,6 +1,11 @@
 from modules import db
 from flask_login import UserMixin
 
+
+class Category(db.Model):
+    category_id = db.Column(db.Integer, primary_key=True)
+    name        = db.Column(db.String(80), unique=True, nullable=False)
+
 class User(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -21,6 +26,7 @@ class Cake(db.Model):
     base_price = db.Column(db.Numeric(10, 2), nullable=False)
     image_url = db.Column(db.Text, nullable=True)
     is_visible = db.Column(db.Boolean, default=True)
+    is_approved = db.Column(db.Boolean, default=True)   # False = staff upload pending admin approval
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 

@@ -3,66 +3,155 @@
 {% block title %} Gallery — Liza's Cakehouse {% endblock %}
 
 {% block content %}
-<div class="gllry" data-logged-in="{{ current_user.is_authenticated | lower }}">
+<section class="gllry">
 
   <!-- Page Header -->
-  <div class="page-header">
+  <header class="page-header">
     <span class="page-label">Our Creations</span>
     <h1 class="page-title">The <em>Gallery</em></h1>
-    <div class="divider">
-      <div class="divider-line"></div>
-      <div class="divider-dot"></div>
-      <div class="divider-line r"></div>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
     </div>
-  </div>
+  </header>
 
   <!-- Filter Bar -->
-  <div class="filter-bar">
-    <span class="filter-label">Filter</span>
+  <nav class="filter-bar" aria-label="Gallery filter">
+    <span class="filter-label" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filter
+    </span>
     <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="Birthday">Birthday</button>
-    <button class="filter-btn" data-filter="Wedding">Wedding</button>
-    <button class="filter-btn" data-filter="Custom">Custom</button>
-    <button class="filter-btn" data-filter="Cupcakes">Cupcakes</button>
-  </div>
+    {% for cat in categories %}
+    <button class="filter-btn" data-filter="{{ cat.name }}">{{ cat.name }}</button>
+    {% endfor %}
+  </nav>
 
   <!-- Gallery Grid -->
   <div class="gallery-grid">
-    {% if cakes %}
-      {% for cake in cakes %}
-      <div class="gallery-item" data-category="{{ cake.category }}">
-        {% if cake.image_url %}
-          <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
-        {% else %}
-          <div class="img-placeholder" style="height:200px;">
-            <span class="cake-emoji">🎂</span>
-          </div>
-        {% endif %}
+    {% for cake in cakes %}
+    <figure class="gallery-item" data-category="{{ cake.category }}" data-id="{{ cake.cake_id }}">
 
-        <!-- Overlay -->
-        <div class="overlay">
-          <span class="overlay-tag">{{ cake.category }}</span>
-          <span class="overlay-title">{{ cake.design_name }}</span>
+      {% if cake.image_url %}
+        <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+      {% else %}
+        <div class="img-placeholder" style="height:220px;">
+          <span class="cake-emoji" aria-hidden="true">🎂</span>
         </div>
+      {% endif %}
 
-        <!-- Like / Dislike -->
-        <div class="reactions">
-          <button class="react-btn like-btn" title="Like">♡</button>
-          <button class="react-btn dislike-btn" title="Dislike">✕</button>
-        </div>
-
-        <!-- Like Count -->
-        <span class="like-count">0 ♡</span>
+      <!-- Overlay -->
+      <div class="overlay">
+        <span class="overlay-tag">{{ cake.category }}</span>
+        <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
+        <p class="overlay-uploader">Liza's Cakehouse</p>
       </div>
-      {% endfor %}
-    {% endif %}
+
+      <!-- Like button (customers only — no dislike) -->
+      <div class="reactions">
+        <button class="react-btn like-btn {% if cake.cake_id in user_likes %}liked{% endif %}"
+                data-id="{{ cake.cake_id }}"
+                aria-label="Like {{ cake.design_name }}"
+                aria-pressed="{{ 'true' if cake.cake_id in user_likes else 'false' }}">
+          {{ '♥' if cake.cake_id in user_likes else '♡' }}
+        </button>
+      </div>
+
+      <!-- Like count -->
+      <span class="like-count {% if likes.get(cake.cake_id, 0) > 0 %}has-likes{% endif %}"
+            aria-live="polite">
+        {{ likes.get(cake.cake_id, 0) }} ♡
+      </span>
+
+    </figure>
+    {% endfor %}
   </div>
 
-  <!-- Empty State -->
-  <div class="empty-state" id="emptyState" {% if cakes %}style="display:none"{% endif %}>
-    <span>🎂</span>
-    There is no photo here yet. Stay tuned!
-  </div>
+  <p class="empty-state" id="emptyState" {% if cakes %}hidden{% endif %}>
+    <span aria-hidden="true">🎂</span>
+    No photos yet — check back soon!
+  </p>
 
-</div>
+</section>
+
+<!-- Lightbox — click a photo to view it large -->
+<dialog id="lightbox" class="lightbox-dialog" aria-label="Photo viewer">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close photo viewer">✕</button>
+  <div class="lightbox-inner">
+    <img id="lightboxImg" src="" alt="">
+    <div class="lightbox-info">
+      <span id="lightboxTag" class="overlay-tag"></span>
+      <p id="lightboxName" class="lightbox-name"></p>
+      <p class="lightbox-uploader">Liza's Cakehouse</p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  /* ── Filter ── */
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const items = document.querySelectorAll('.gallery-item');
+  const emptyState = document.getElementById('emptyState');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      let visible = 0;
+      items.forEach(item => {
+        const match = filter === 'all' || item.dataset.category === filter;
+        item.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      emptyState.hidden = visible > 0;
+    });
+  });
+
+  /* ── Like toggle ── */
+  document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation(); // prevent lightbox from opening
+      const id = btn.dataset.id;
+      try {
+        const res = await fetch(`/gallery/${id}/like`, { method: 'POST' });
+        const data = await res.json();
+        const figure = btn.closest('.gallery-item');
+        const countEl = figure.querySelector('.like-count');
+
+        btn.textContent = data.liked ? '♥' : '♡';
+        btn.classList.toggle('liked', data.liked);
+        btn.setAttribute('aria-pressed', data.liked);
+        countEl.textContent = `${data.total} ♡`;
+        countEl.classList.toggle('has-likes', data.total > 0);
+      } catch {
+        /* silently fail — network issue */
+      }
+    });
+  });
+
+  /* ── Lightbox ── */
+  const dialog = document.getElementById('lightbox');
+  const lbImg  = document.getElementById('lightboxImg');
+  const lbTag  = document.getElementById('lightboxTag');
+  const lbName = document.getElementById('lightboxName');
+
+  items.forEach(item => {
+    item.addEventListener('click', e => {
+      if (e.target.closest('.like-btn')) return; // don't open lightbox on like click
+      const img = item.querySelector('img');
+      lbImg.src  = img ? img.src : '';
+      lbImg.alt  = img ? img.alt : '';
+      lbTag.textContent  = item.querySelector('.overlay-tag').textContent;
+      lbName.textContent = item.querySelector('.overlay-title').textContent;
+      dialog.showModal();
+    });
+  });
+
+  document.getElementById('lightboxClose').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+})();
+</script>
 {% endblock %}

@@ -1,19 +1,5 @@
-/* ============================================================
-   LIZA'S CAKEHOUSE — STYLESHEET
-   Structure:
-   1. Imports & Reset
-   2. Root Variables
-   3. Base / Global
-   4. Shared Components (buttons, divider)
-   5. Header
-   6. Footer
-   7. Landing Page
-   8. Gallery Page
-   9. Auth Pages (Login & Register)
-   ============================================================ */
+/* ── IMPORTS ── */
 
-
-/* ── 1. IMPORTS & RESET ── */
 @import url('https://fonts.googleapis.com/css2?family=Francois+One&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -23,18 +9,34 @@
 }
 
 
-/* ── 2. ROOT VARIABLES ── */
+/* ── ROOT VARIABLES ── */
 :root {
-    --bg: white;
-    --card: #FCC5DF;
-    --accent: #FF7DB0;
-    --text: #000000;
-    --placeholder: #D9D9D9;
+    /* Backgrounds */
+    --bg:       white;          
+    --bg-tint:  #fff5f8;       
+    --input-bg: #fff9fb;        
+
+    /* Brand colors */
+    --card:        #FCC5DF;     /* cards, chips, borders */
+    --accent:      #FF7DB0;     /* uttons, links, highlights */
+    --accent-dark: #c7607a;     /* hover states, error text */
+    --accent-muted: #ee9ca7;    /* shadows, decorative use */
+
+    /* Text */
+    --text:       #5a3838;      /* main body text */
+    --text-muted: #b09090;      /* secondary / lighter text */
+    --placeholder: #D9D9D9;     /* input placeholder */
+
+    /* Borders */
+    --border: #f0d9d0;          /* input borders, card borders, dividers */
+
+    /* Spacing */
     --spacing: 40px;
 }
 
 
-/* ── 3. BASE / GLOBAL ── */
+/* ── BASE / GLOBAL ── */
+
 body {
     background-color: var(--bg);
     font-family: 'Poppins', sans-serif;
@@ -46,9 +48,8 @@ h1, h2, h3, h4 {
 }
 
 
-/* ── 4. SHARED COMPONENTS ── */
+/* ── SHARED COMPONENTS ── */
 
-/* Primary button — outlined with accent border */
 .prm-btn {
     border: 2px solid var(--accent);
 }
@@ -57,7 +58,6 @@ h1, h2, h3, h4 {
     transform: scale(1.1) !important;
 }
 
-/* Secondary button — solid accent background */
 .scnd-btn {
     background-color: var(--accent);
     color: var(--bg);
@@ -69,7 +69,57 @@ h1, h2, h3, h4 {
     transform: scale(1.1) !important;
 }
 
-/* Decorative divider (used on gallery & landing) */
+.cta-btn1 {
+    background: linear-gradient(to right, var(--accent) 0%, var(--card) 51%, var(--accent) 100%);
+    background-size: 200% auto;
+    padding: 14px 36px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--bg);
+    border-radius: 50px;
+    border: none;
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 8px 24px #ff7db040;
+    transition: background-position 0.5s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-btn1:hover {
+    background-position: right center;
+    color: var(--bg);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px #ff7db055;
+}
+
+.cta-btn2 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 14px 24px;
+    border-radius: 50px;
+    border: 2px solid var(--card);
+    transition: all 0.2s ease;
+}
+
+.cta-btn2:hover {
+    background: var(--card);
+    color: var(--text);
+}
+
+
+/* ·· Decorative divider ··
+   Structure: <div class="divider">
+                <span class="divider-line"></span>
+                <span class="divider-dot"></span>
+                <span class="divider-line r"></span>
+              </div>
+*/
+
 .divider {
     display: flex;
     align-items: center;
@@ -84,6 +134,7 @@ h1, h2, h3, h4 {
     background: linear-gradient(to right, transparent, var(--accent));
 }
 
+/* Right-side line fades in the opposite direction */
 .divider-line.right,
 .divider-line.r {
     background: linear-gradient(to left, transparent, var(--accent));
@@ -97,8 +148,93 @@ h1, h2, h3, h4 {
 }
 
 
-/* ── 5. HEADER ── */
-#header {
+/* ·· Section & page headers ··*/
+
+.section-label,
+.page-label {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 10px;
+}
+
+.section-title,
+.page-title {
+    font-size: 44px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.15;
+}
+
+
+.section-title em,
+.page-title em {
+    font-style: italic;
+    color: var(--accent);
+}
+
+.section-header,
+.page-header {
+    text-align: center;
+    margin-bottom: 52px;
+}
+
+
+/* ·· Shared card & step text ··
+   .card-title and .step-title are identical — kept separate in HTML for clarity
+   but share the same CSS. Same goes for .card-desc and .step-desc.
+   To make them look different, just add a separate override rule below.
+*/
+
+.card-title,
+.step-title {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+}
+
+.card-desc,
+.step-desc {
+    font-size: 13.5px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.75;
+    letter-spacing: 0.2px;
+}
+
+
+/* ·· Animations ·· */
+
+/* Floating effect — used on the hero cake image */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-14px); }
+}
+
+/* Color pulse — used on the CTA banner background */
+.color-change-2x {
+    -webkit-animation: color-change-2x 2s linear infinite alternate both;
+    animation: color-change-2x 2s linear infinite alternate both;
+}
+
+@-webkit-keyframes color-change-2x {
+    0%   { background: var(--accent); }
+    100% { background: var(--card); }
+}
+
+@keyframes color-change-2x {
+    0%   { background: var(--card); }
+    100% { background: var(--accent); }
+}
+
+
+/* ── HEADER ── */
+header {
     margin: 0 80px;
 }
 
@@ -126,23 +262,28 @@ h1, h2, h3, h4 {
     justify-content: center;
 }
 
+/* Brand name text next to the logo */
+.brand-name-header {
+    font-family: 'François One', sans-serif;
+}
+
 .header-text a {
     padding: 10px 20px;
     font-family: 'Francois One', sans-serif;
-    font-weight: 100;
+    font-weight: 400;
 }
 
 
-/* ── 6. FOOTER ── */
+/* ── FOOTER ── */
+
 footer {
     background: var(--bg);
-    border-top: 1px solid #f0d9d0;
+    border-top: 1px solid var(--bg);
     padding: 56px 64px 28px;
     position: relative;
     overflow: hidden;
 }
 
-/* Soft decorative blobs */
 footer::before,
 footer::after {
     content: '';
@@ -154,7 +295,7 @@ footer::after {
 footer::before {
     width: 320px;
     height: 320px;
-    background: radial-gradient(circle, #ffdde155 0%, transparent 70%);
+    background: var(--bg);
     top: -80px;
     right: -60px;
 }
@@ -162,19 +303,19 @@ footer::before {
 footer::after {
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, #ee9ca730 0%, transparent 70%);
+    background: var(--bg);
     bottom: -40px;
     left: 30%;
 }
 
-/* Top section */
+/* Top row — brand block + contact info */
 .footer-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 40px;
     padding-bottom: 44px;
-    border-bottom: 1px solid #f0d9d0;
+    border-bottom: 1px solid var(--card);
     position: relative;
     z-index: 1;
 }
@@ -191,13 +332,13 @@ footer::after {
     border-radius: 50%;
     background: linear-gradient(135deg, var(--card) 0%, #ffdde1 100%);
     flex-shrink: 0;
-    box-shadow: 0 8px 24px #ee9ca740;
+    box-shadow: 0 8px 24px var(--accent-muted);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 28px;
     font-style: italic;
-    color: #fff;
+    color: var(--bg);
     letter-spacing: -1px;
 }
 
@@ -210,7 +351,7 @@ footer::after {
 .brand-name {
     font-size: 26px;
     font-weight: 400;
-    color: #3a2020;
+    color: var(--text);
     letter-spacing: 0.5px;
     line-height: 1.1;
 }
@@ -220,10 +361,10 @@ footer::after {
     font-weight: 300;
     letter-spacing: 2.5px;
     text-transform: uppercase;
-    color: #b07070;
+    color: var(--text-muted);
 }
 
-/* Contact info */
+/* Contact list inside <address> */
 .contact-list {
     list-style: none;
     display: flex;
@@ -237,7 +378,7 @@ footer::after {
     gap: 12px;
     font-size: 13.5px;
     font-weight: 300;
-    color: #5a3838;
+    color: var(--text);
     letter-spacing: 0.3px;
     transition: color 0.3s ease;
 }
@@ -246,12 +387,17 @@ footer::after {
     color: var(--accent);
 }
 
+.contact-list li a {
+    color: inherit;
+    text-decoration: none;
+}
+
 .contact-list li svg {
     flex-shrink: 0;
     opacity: 0.7;
 }
 
-/* Bottom section */
+/* Bottom row — nav links + copyright */
 .footer-bottom {
     display: flex;
     justify-content: space-between;
@@ -272,12 +418,13 @@ footer::after {
     font-weight: 400;
     letter-spacing: 1.8px;
     text-transform: uppercase;
-    color: #8a5555;
+    color: var(--text);
     text-decoration: none;
     position: relative;
     transition: color 0.3s ease;
 }
 
+/* Animated underline on hover */
 .footer-nav a::after {
     content: '';
     position: absolute;
@@ -300,22 +447,23 @@ footer::after {
 .copyright {
     font-size: 11px;
     font-weight: 300;
-    color: #b09090;
+    color: var(--text-muted);
     letter-spacing: 0.5px;
 }
 
 
 /* ── 7. LANDING PAGE ── */
 
-/* Hero section */
+/* ·· Hero ·· */
+
 .hero-section {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(180deg, #fff 0%, #fff5f8 40%, #fff 100%);
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-tint) 40%, var(--bg) 100%);
     padding-bottom: 0;
 }
 
-/* Decorative blobs */
+/* Decorative background blobs — purely visual, no interaction */
 .blob {
     position: absolute;
     border-radius: 50%;
@@ -364,11 +512,11 @@ footer::after {
     max-width: 560px;
 }
 
-/* Small tag above title */
+/* Small eyebrow tag above the main heading */
 .hero-tag {
     display: inline-block;
     background: var(--card);
-    color: #c7607a;
+    color: var(--text);
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 1.5px;
@@ -377,6 +525,7 @@ footer::after {
     width: fit-content;
 }
 
+/* Main hero heading */
 .title {
     font-size: 58px;
     font-weight: 400;
@@ -384,6 +533,7 @@ footer::after {
     line-height: 1.2;
 }
 
+/* Paragraph below the heading */
 .body-text {
     font-size: 16px;
     font-weight: 300;
@@ -391,7 +541,6 @@ footer::after {
     line-height: 1.8;
 }
 
-/* Hero CTA buttons */
 .hero-actions {
     display: flex;
     align-items: center;
@@ -399,49 +548,7 @@ footer::after {
     flex-wrap: wrap;
 }
 
-.cta-btn1 {
-    background: linear-gradient(to right, var(--accent) 0%, var(--card) 51%, var(--accent) 100%);
-    background-size: 200% auto;
-    padding: 14px 36px;
-    text-align: center;
-    text-transform: uppercase;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    color: white;
-    border-radius: 50px;
-    border: none;
-    outline: none;
-    text-decoration: none;
-    display: inline-block;
-    box-shadow: 0 8px 24px #ff7db040;
-    transition: background-position 0.5s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.cta-btn1:hover {
-    background-position: right center;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px #ff7db055;
-}
-
-.cta-btn2 {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--accent);
-    text-decoration: none;
-    padding: 14px 24px;
-    border-radius: 50px;
-    border: 2px solid var(--card);
-    transition: all 0.2s ease;
-}
-
-.cta-btn2:hover {
-    background: var(--card);
-    color: #c7607a;
-}
-
-/* Hero image */
+/* Hero image (right side) */
 .hero-right {
     position: relative;
     z-index: 1;
@@ -452,6 +559,7 @@ footer::after {
     width: 480px;
 }
 
+/* Soft glow circle behind the cake image */
 .hero-img-wrap::before {
     content: '';
     position: absolute;
@@ -469,22 +577,20 @@ footer::after {
     animation: float 4s ease-in-out infinite;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-14px); }
-}
 
-/* Stats bar */
+/* ·· Stats bar ·· */
+
 .stats-bar {
     position: relative;
     z-index: 1;
+    list-style: none;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0;
-    background: #fff;
-    border-top: 1px solid #f0d9d0;
-    border-bottom: 1px solid #f0d9d0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     padding: 24px 0;
     margin-top: 20px;
 }
@@ -509,31 +615,48 @@ footer::after {
     font-weight: 300;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: #b09090;
+    color: var(--text);
 }
 
 .stat-divider {
     width: 1px;
     height: 40px;
-    background: #f0d9d0;
+    background: var(--border);
 }
 
-/* How it works section (sc2) */
-.wf1-container {
-    width: 100%;
-    max-width: 1100px;
-}
 
-.sc2 {
-    min-height: 100vh;
+/* ·· How It Works — sc2 & Why Choose Us — sc3 ··
+   Both sections share the same flex layout and padding.
+   .wf1-container (sc2) and .wf3 (sc3) both cap their content at 1100px.
+   Individual backgrounds are set separately below.
+*/
+
+.sc2,
+.sc3 {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 80px 40px;
-    background: linear-gradient(180deg, #fff5f8 0%, #fff 100%);
 }
 
+.sc2 {
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--bg-tint) 0%, var(--bg) 100%);
+}
+
+.sc3 {
+    background: var(--bg);
+}
+
+.wf1-container,
+.wf3 {
+    width: 100%;
+    max-width: 1100px;
+}
+
+/* Step cards — 3-column grid */
 .steps {
+    list-style: none;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 28px;
@@ -548,9 +671,10 @@ footer::after {
     text-align: center;
     position: relative;
     z-index: 1;
-    padding-top: 42px;
+    padding-top: 42px;  /* space for the icon circle floating above the card */
 }
 
+/* Circle icon that floats above the card body */
 .step-icon-wrap {
     width: 84px;
     height: 84px;
@@ -572,10 +696,11 @@ footer::after {
     box-shadow: 0 16px 36px #ee9ca760;
 }
 
+/* White card body below the icon */
 .step-body {
-    background: #fff;
+    background: var(--bg);
     border-radius: 20px;
-    border: 1px solid #f0d9d0;
+    border: 1px solid var(--card);
     padding: 60px 30px 34px;
     width: 100%;
     position: relative;
@@ -587,6 +712,7 @@ footer::after {
     box-shadow: 0 20px 48px #ee9ca720;
 }
 
+/* Pink underline that slides in from left on hover */
 .step-body::after {
     content: '';
     position: absolute;
@@ -606,6 +732,7 @@ footer::after {
     transform: scaleX(1);
 }
 
+/* Large ghost number (e.g. "01") in the background of the card */
 .step-number {
     position: absolute;
     top: 14px;
@@ -617,83 +744,35 @@ footer::after {
     user-select: none;
 }
 
-.step-title {
-    font-size: 22px;
-    font-weight: 400;
-    color: #3a2020;
-    margin-bottom: 12px;
-    letter-spacing: 0.3px;
-}
 
-.step-desc {
-    font-size: 13.5px;
-    font-weight: 300;
-    color: #7a5555;
-    line-height: 1.75;
-    letter-spacing: 0.2px;
-}
+/* ·· Why Choose Us cards ·· */
 
-/* Why us section (sc3) */
-.sc3 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 40px;
-    background: var(--bg);
-}
-
-.wf3 {
-    width: 100%;
-    max-width: 1100px;
-    position: relative;
-    justify-content: center;
-    align-items: center;
-}
-
-.section-header {
-    text-align: center;
-    margin-bottom: 52px;
-}
-
-.section-label {
-    font-size: 11px;
-    font-weight: 400;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
-    display: block;
-}
-
-.section-title {
-    font-size: 46px;
-    font-weight: 400;
-    color: #3a2020;
-    line-height: 1.15;
-}
-
-.section-title em {
-    font-style: italic;
-    color: var(--accent);
-}
-
+/* 2-column card grid */
 .cards {
+    list-style: none;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
 }
 
+/*
+   NOTE: .card conflicts with DaisyUI's built-in .card class.
+   These styles are for the "Why choose us" feature cards on the landing page only.
+   If you use DaisyUI <div class="card"> elsewhere and it breaks,
+   wrap it in a more specific parent selector to avoid this conflict.
+*/
 .card {
-    background: #fff;
+    background: var(--bg);
     border-radius: 20px;
     padding: 36px 36px 32px;
-    border: 1px solid #f0d9d0;
+    border: 1px solid var(--card);
     position: relative;
     overflow: hidden;
     transition: transform 0.35s ease, box-shadow 0.35s ease;
     cursor: default;
 }
 
+/* Pink top bar that slides in on hover */
 .card::before {
     content: '';
     position: absolute;
@@ -716,6 +795,7 @@ footer::after {
     transform: scaleX(1);
 }
 
+/* Emoji icon block */
 .card-icon {
     width: 52px;
     height: 52px;
@@ -728,22 +808,7 @@ footer::after {
     font-size: 22px;
 }
 
-.card-title {
-    font-size: 22px;
-    font-weight: 400;
-    color: #3a2020;
-    margin-bottom: 10px;
-    letter-spacing: 0.3px;
-}
-
-.card-desc {
-    font-size: 13.5px;
-    font-weight: 300;
-    color: #7a5555;
-    line-height: 1.75;
-    letter-spacing: 0.2px;
-}
-
+/* Large ghost number bottom-right (e.g. "01") */
 .card-number {
     position: absolute;
     bottom: 18px;
@@ -757,15 +822,16 @@ footer::after {
 }
 
 
-/* CTA Banner */
+/* ·· CTA Banner ·· */
+
 .cta-banner {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--card) 100%);
     padding: 80px 40px;
     text-align: center;
     position: relative;
     overflow: hidden;
 }
 
+/* Faded cake emojis in the corners — decorative only */
 .cta-banner::before {
     content: '🎂';
     position: absolute;
@@ -798,31 +864,33 @@ footer::after {
 .cta-banner-inner h2 {
     font-size: 36px;
     font-weight: 400;
-    color: #fff;
+    color: var(--bg);
 }
 
 .cta-banner-inner p {
     font-size: 15px;
     font-weight: 300;
-    color: #fff;
+    color: var(--bg);
     opacity: 0.9;
 }
 
+/* White pill button inside the pink banner — overrides the default .cta-btn1 gradient */
 .cta-banner-inner .cta-btn1 {
-    background: #fff;
+    background: var(--bg);
     color: var(--accent);
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     margin-top: 8px;
 }
 
 .cta-banner-inner .cta-btn1:hover {
-    background: #fff;
-    color: #c7607a;
+    background: var(--bg);
+    color: var(--accent-dark);
     transform: translateY(-2px);
 }
 
 
 /* ── 8. GALLERY PAGE ── */
+
 .gllry {
     background: var(--bg);
     min-height: 100vh;
@@ -831,33 +899,9 @@ footer::after {
     z-index: 1;
 }
 
-/* Page header */
-.page-header {
-    text-align: center;
-    margin-bottom: 44px;
-}
 
-.page-label {
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    display: block;
-    margin-bottom: 8px;
-}
+/* ·· Filter bar ·· */
 
-.page-title {
-    font-size: 44px;
-    font-weight: 400;
-    line-height: 1.1;
-}
-
-.page-title em {
-    font-style: italic;
-    color: var(--accent);
-}
-
-/* Filter bar */
 .filter-bar {
     display: flex;
     align-items: center;
@@ -884,8 +928,8 @@ footer::after {
     text-transform: uppercase;
     padding: 8px 20px;
     border-radius: 40px;
-    border: 1px solid #f0d9d0;
-    background: #fff;
+    border: 1px solid var(--border);
+    background: var(--bg);
     color: var(--text);
     cursor: pointer;
     transition: all 0.25s ease;
@@ -899,11 +943,14 @@ footer::after {
 .filter-btn.active {
     background: var(--accent);
     border-color: transparent;
-    color: #fff;
+    color: var(--bg);
     box-shadow: 0 4px 14px #ee9ca740;
 }
 
-/* Masonry grid */
+
+/* ·· Gallery grid ·· */
+
+/* Masonry column layout — JS filters hide items with .hidden class */
 .gallery-grid {
     columns: 4;
     column-gap: 16px;
@@ -912,7 +959,7 @@ footer::after {
 @media (max-width: 900px) { .gallery-grid { columns: 2; } }
 @media (max-width: 500px) { .gallery-grid { columns: 1; } }
 
-/* Gallery item */
+/* Each gallery card (<figure>) */
 .gallery-item {
     break-inside: avoid;
     margin-bottom: 16px;
@@ -929,6 +976,7 @@ footer::after {
     box-shadow: 0 16px 40px #ee9ca730;
 }
 
+/* Toggled by JS when item doesn't match the active filter */
 .gallery-item.hidden {
     display: none;
 }
@@ -940,7 +988,7 @@ footer::after {
     object-fit: cover;
 }
 
-/* Image placeholder */
+/* Shown when there's no image URL for a cake */
 .img-placeholder {
     width: 100%;
     display: block;
@@ -958,7 +1006,9 @@ footer::after {
     opacity: 0.4;
 }
 
-/* Hover overlay */
+
+/* ·· Hover overlay ·· */
+
 .overlay {
     position: absolute;
     inset: 0;
@@ -984,14 +1034,18 @@ footer::after {
     margin-bottom: 4px;
 }
 
+/* Cake name (<figcaption>) inside the overlay */
 .overlay-title {
     font-size: 17px;
     font-style: italic;
-    color: #fff;
+    color: var(--bg);
     font-weight: 300;
 }
 
-/* Like / Dislike */
+
+/* ·· Reactions (like / dislike) ·· */
+
+/* Slide in from the right on hover */
 .reactions {
     position: absolute;
     top: 12px;
@@ -1030,22 +1084,18 @@ footer::after {
     transform: scale(1.18);
 }
 
-.react-btn.liked {
-    background: var(--accent);
-}
+/* State classes toggled by JS after user reacts */
+.react-btn.liked    { background: var(--accent); }
+.react-btn.disliked { background: var(--card); }
 
-.react-btn.disliked {
-    background: var(--card);
-}
-
-/* Like count badge */
+/* Like count badge — bottom-right, shown on hover or when count > 0 */
 .like-count {
     position: absolute;
     bottom: 12px;
     right: 12px;
     font-size: 11px;
     font-weight: 400;
-    color: #fff;
+    color: var(--bg);
     background: var(--accent);
     backdrop-filter: blur(4px);
     padding: 3px 9px;
@@ -1061,15 +1111,24 @@ footer::after {
     opacity: 1;
 }
 
-/* Empty state */
+
+/* ·· Empty state ··
+   Shown by Jinja via the HTML `hidden` attribute when no cakes exist,
+   or toggled by JS when no items match the active filter.
+*/
+
 .empty-state {
-    display: none;
+    display: block;
     text-align: center;
     padding: 80px 20px;
     color: var(--text);
     font-size: 15px;
     font-weight: 300;
     width: 100%;
+}
+
+.empty-state[hidden] {
+    display: none;
 }
 
 .empty-state span {
@@ -1079,9 +1138,9 @@ footer::after {
 }
 
 
-/* ── 9. AUTH PAGES (Login & Register) ── */
+/* ── 9. AUTH PAGES — Login & Register ── */
 
-/* Back button */
+/* Fixed pill button in the top-left corner */
 .back-btn {
     position: fixed;
     top: 24px;
@@ -1090,8 +1149,8 @@ footer::after {
     font-weight: 500;
     color: var(--accent);
     text-decoration: none;
-    background: #fff;
-    border: 1px solid #f0d9d0;
+    background: var(--bg);
+    border: 1px solid var(--border);
     padding: 8px 16px;
     border-radius: 40px;
     box-shadow: 0 2px 10px #ee9ca720;
@@ -1104,10 +1163,31 @@ footer::after {
     box-shadow: 0 4px 16px #ee9ca730;
 }
 
-/* Auth card */
+/* Flash messages — shown after form submission errors or success */
+.flash-msg {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 400;
+    margin-bottom: 12px;
+}
+
+.flash-error {
+    background-color: #ffe4ec;
+    color: var(--accent-dark);
+    border: 1px solid var(--accent);
+}
+
+.flash-success {
+    background-color: #e8f9f0;
+    color: #2d7a4f;
+    border: 1px solid #2d7a4f;
+}
+
+/* Auth card — the centered white box on login & register pages */
 .card-auth {
-    background: #fff;
-    border: 1px solid #f0d9d0;
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 24px;
     padding: 48px 40px;
     width: 100%;
@@ -1125,7 +1205,7 @@ footer::after {
     margin: 0 auto 12px;
 }
 
-.auth-logo h2 {
+.auth-logo h1 {
     font-size: 26px;
     font-weight: 400;
     color: var(--accent);
@@ -1135,35 +1215,16 @@ footer::after {
 .auth-logo p {
     font-size: 13px;
     font-weight: 300;
-    color: #b09090;
+    color: var(--text-muted);
 }
 
-/* Auth form */
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.form-group label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #5a3838;
-}
-
-/* Footer link */
+/* "Already have an account?" line at the bottom of the form */
 .auth-footer {
     text-align: center;
     margin-top: 24px;
     font-size: 13px;
     font-weight: 300;
-    color: #b09090;
+    color: var(--text-muted);
 }
 
 .auth-footer a {
@@ -1176,6 +1237,263 @@ footer::after {
     text-decoration: underline;
 }
 
-.input{
+/* Auth form — stacks inputs vertically */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Each label + input pair */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--text);
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* Wraps the input + eye button so the button can sit inside the field */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Pushes input text left so it doesn't go under the eye button */
+.input-wrapper input {
+    padding-right: 44px !important;
+}
+
+/* Show/hide password toggle button */
+.eye-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.eye-btn:hover {
+    color: var(--accent);
+}
+
+/* Text / email / password inputs */
+.form-group input {
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+    color: var(--text);
+    background: var(--input-bg);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+}
+
+.form-group input::placeholder {
+    color: var(--placeholder);
+    font-weight: 300;
+}
+
+.form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px #ff7db015;
+    background: var(--bg);
+}
+
+
+/* ── 9b. GALLERY EXTRAS ── */
+
+/* Category management modal list */
+.cat-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cat-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text);
+}
+
+.cat-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.cat-delete-btn:hover {
+    color: var(--accent-dark);
+    background: #ffe4ec;
+}
+
+.cat-add-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 24px;
+}
+
+/* Uploader credit inside overlay */
+.overlay-uploader {
+    font-size: 10px;
+    color: #ffdde1aa;
+    margin-top: 2px;
+    letter-spacing: 1px;
+}
+
+/* Pending approval badge in admin gallery header */
+.approved-section {
+    margin-top: 32px;
+}
+
+.approved-section.has-pending {
+    margin-top: 48px;
+}
+
+.pending-section {
+    margin-bottom: 8px;
+}
+
+.pending-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pending-badge {
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+/* Pending items get a subtle amber outline */
+.pending-item {
+    outline: 2px solid #f59e0b66;
+}
+
+/* Modal note text (staff upload modal) */
+.modal-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-style: italic;
+}
+
+/* ── Lightbox ── */
+
+.lightbox-dialog {
+    border: none;
+    background: transparent;
+    padding: 0;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: visible;
+}
+
+/* Dim the background when lightbox is open */
+.lightbox-dialog::backdrop {
+    background: rgba(30, 10, 20, 0.75);
+    backdrop-filter: blur(6px);
+}
+
+.lightbox-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.lightbox-dialog img {
+    max-width: 80vw;
+    max-height: 75vh;
+    object-fit: contain;
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    display: block;
+}
+
+.lightbox-info {
+    text-align: center;
+}
+
+.lightbox-name {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--bg);
+    margin-top: 6px;
+    font-style: italic;
+}
+
+.lightbox-uploader {
+    font-size: 11px;
+    color: #ffdde1aa;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: var(--bg);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text);
+    z-index: 10;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.lightbox-close:hover {
+    transform: scale(1.15);
+    color: var(--accent);
+}
+
+
+/* ── 10. DAISYUI OVERRIDES ── */
+/*
+   DaisyUI sets its own background on .input elements.
+   This forces our --bg color on DaisyUI inputs (used in admin modals).
+*/
+.input {
     background-color: var(--bg);
 }

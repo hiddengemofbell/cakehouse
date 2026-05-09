@@ -5,16 +5,16 @@
 {% block content %}
 
 <!-- ── HERO ── -->
-<section class="hero-section">
+<section class="hero-section" aria-label="Hero">
     <!-- Decorative blobs -->
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+    <div class="blob blob-1" aria-hidden="true"></div>
+    <div class="blob blob-2" aria-hidden="true"></div>
+    <div class="blob blob-3" aria-hidden="true"></div>
 
     <div class="hero-container">
         <div class="hero-left">
             <span class="hero-tag">✦ Custom Cakes, Made With Love</span>
-            <p class="title">Baked with love,<br>served with<br>warmth.</p>
+            <h1 class="title">Baked with love,<br>served with<br>warmth.</h1>
             <p class="body-text">From birthdays to weddings, we craft custom cakes made just for you. Browse our designs, place your order, and let us handle the rest.</p>
             <div class="hero-actions">
                 <a href="#" class="cta-btn1">Design Your Own Cake!</a>
@@ -24,125 +24,130 @@
 
         <div class="hero-right">
             <div class="hero-img-wrap">
-                <img src="{{ url_for('static', filename='images/hero-cake.png') }}" alt="Cake Image">
+                <img src="{{ url_for('static', filename='images/hero-cake.png') }}" alt="A beautifully decorated custom cake">
             </div>
         </div>
     </div>
 
     <!-- Stats bar -->
-    <div class="stats-bar">
-        <div class="stat">
+    <ul class="stats-bar" aria-label="Business highlights">
+        <li class="stat">
             <span class="stat-num">500+</span>
             <span class="stat-label">Happy Customers</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
+        </li>
+        <li class="stat-divider" aria-hidden="true"></li>
+        <li class="stat">
             <span class="stat-num">100%</span>
             <span class="stat-label">Handcrafted</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
+        </li>
+        <li class="stat-divider" aria-hidden="true"></li>
+        <li class="stat">
             <span class="stat-num">50+</span>
             <span class="stat-label">Unique Designs</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
+        </li>
+        <li class="stat-divider" aria-hidden="true"></li>
+        <li class="stat">
             <span class="stat-num">5★</span>
             <span class="stat-label">Average Rating</span>
-        </div>
-    </div>
+        </li>
+    </ul>
 </section>
 
 <!-- ── HOW IT WORKS ── -->
-<section class="sc2">
+<section class="sc2" aria-labelledby="how-it-works-title">
     <div class="wf1-container">
-        <div class="section-header">
+        <header class="section-header">
             <span class="section-label">Simple & Sweet</span>
-            <h2 class="section-title">How It <em>Works</em></h2>
-            <div class="divider">
+            <h2 class="section-title" id="how-it-works-title">How It <em>Works</em></h2>
+            <div class="divider" aria-hidden="true">
                 <span class="divider-line"></span>
                 <span class="divider-dot"></span>
                 <span class="divider-line right"></span>
             </div>
-        </div>
+        </header>
 
-        <div class="steps">
-            <div class="step-card">
-                <div class="step-icon-wrap">📋</div>
+        <ol class="steps">
+            <li class="step-card">
+                <div class="step-icon-wrap" aria-hidden="true">📋</div>
                 <div class="step-body">
-                    <span class="step-number">01</span>
+                    <span class="step-number" aria-hidden="true">01</span>
                     <h3 class="step-title">Place Your Order</h3>
                     <p class="step-desc">Browse our menu or reach out with a custom request. Tell us your flavor, design, and occasion — we'll take it from there.</p>
                 </div>
-            </div>
-            <div class="step-card">
-                <div class="step-icon-wrap">🎨</div>
+            </li>
+            <li class="step-card">
+                <div class="step-icon-wrap" aria-hidden="true">🎨</div>
                 <div class="step-body">
-                    <span class="step-number">02</span>
+                    <span class="step-number" aria-hidden="true">02</span>
                     <h3 class="step-title">We Bake & Design</h3>
                     <p class="step-desc">Our baker gets to work crafting your cake fresh from scratch — every detail made with care, from the layers to the finishing touches.</p>
                 </div>
-            </div>
-            <div class="step-card">
-                <div class="step-icon-wrap">🎉</div>
+            </li>
+            <li class="step-card">
+                <div class="step-icon-wrap" aria-hidden="true">🎉</div>
                 <div class="step-body">
-                    <span class="step-number">03</span>
+                    <span class="step-number" aria-hidden="true">03</span>
                     <h3 class="step-title">Pick Up & Celebrate</h3>
                     <p class="step-desc">Your cake is ready right on time. Pick it up and enjoy every slice — made with love, delivered with a smile.</p>
                 </div>
-            </div>
-        </div>
+            </li>
+        </ol>
     </div>
 </section>
 
 <!-- ── WHY CHOOSE US ── -->
-<section class="sc3">
+<section class="sc3" aria-labelledby="why-choose-us-title">
     <div class="wf3">
-        <div class="section-header">
+        <header class="section-header">
             <span class="section-label">Our Promise</span>
-            <h2 class="section-title">Why Choose <em>Us?</em></h2>
-            <div class="divider">
+            <h2 class="section-title" id="why-choose-us-title">Why Choose <em>Us?</em></h2>
+            <div class="divider" aria-hidden="true">
                 <span class="divider-line"></span>
                 <span class="divider-dot"></span>
                 <span class="divider-line right"></span>
             </div>
-        </div>
+        </header>
 
-        <div class="cards">
-            <div class="card">
-                <div class="card-icon">🎂</div>
+        <ul class="cards">
+            <li class="card">
+                <div class="card-icon" aria-hidden="true">🎂</div>
                 <h3 class="card-title">Handcrafted with Love</h3>
                 <p class="card-desc">Every cake is made from scratch using only the finest ingredients. No shortcuts, no mixes — just pure homemade goodness baked into every layer.</p>
-                <span class="card-number">01</span>
-            </div>
-            <div class="card">
-                <div class="card-icon">✨</div>
+                <span class="card-number" aria-hidden="true">01</span>
+            </li>
+            <li class="card">
+                <div class="card-icon" aria-hidden="true">✨</div>
                 <h3 class="card-title">Custom Designs</h3>
                 <p class="card-desc">From intimate birthdays to grand celebrations, we bring your vision to life. Share your idea and we'll craft a cake that's uniquely yours.</p>
-                <span class="card-number">02</span>
-            </div>
-            <div class="card">
-                <div class="card-icon">🌸</div>
+                <span class="card-number" aria-hidden="true">02</span>
+            </li>
+            <li class="card">
+                <div class="card-icon" aria-hidden="true">🌸</div>
                 <h3 class="card-title">Fresh Every Order</h3>
                 <p class="card-desc">We never pre-bake in bulk. Each order is prepared fresh to ensure the best taste, texture, and presentation on your special day.</p>
-                <span class="card-number">03</span>
-            </div>
-            <div class="card">
-                <div class="card-icon">💌</div>
+                <span class="card-number" aria-hidden="true">03</span>
+            </li>
+            <li class="card">
+                <div class="card-icon" aria-hidden="true">💌</div>
                 <h3 class="card-title">Heartfelt Service</h3>
                 <p class="card-desc">We treat every order like it matters — because it does. Expect warm, personal service from your first message to final delivery.</p>
-                <span class="card-number">04</span>
-            </div>
-        </div>
+                <span class="card-number" aria-hidden="true">04</span>
+            </li>
+        </ul>
     </div>
 </section>
 
 <!-- ── CTA BANNER ── -->
-<section class="cta-banner">
+<section class="cta-banner color-change-2x" aria-label="Call to action">
     <div class="cta-banner-inner">
         <h2>Ready to order your dream cake?</h2>
         <p>Let's make your celebration extra special — one slice at a time.</p>
-        <a href="{{ url_for('auth.register') }}" class="cta-btn1">Get Started</a>
+
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.booking_page') }}" class="cta-btn1">Start Booking</a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="cta-btn1">Get Started</a>
+        {% endif %}
     </div>
 </section>
 

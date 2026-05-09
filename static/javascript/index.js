@@ -40,6 +40,7 @@ items.forEach(item => {
     e.stopPropagation();
 
     if (!isLoggedIn) {
+      /* to be edited */
       alert('Please log in to like a photo.');
       return;
     }

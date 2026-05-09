@@ -8,7 +8,6 @@
     <!-- Tailwind + DaisyUI CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -17,103 +16,111 @@
 <body>
 
     <header>
-        <section id="header">
+        <div class="header-container shadow-md">
 
-                <div class="header-container shadow-md">
-                    <div class="logo-header flex justify-start">
-                        <a href="{{ url_for('main.landing')}}"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo"></a>
-                        <p style="font-family: 'Francois One', sans-serif;">Liza's Cake House</p>
-                    </div>
-                    <nav class="header-text flex justify-center">
-                        {% if current_user.is_authenticated %}
-                            {% if current_user.role == 'admin' %}
-                                <a href="#">Dashboard</a>
-                                <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
-                                <a href="#">Bookings</a>
-                                <a href="#">Calendar</a>
-                                <a href="#">Admin Panel</a>
-                            {% elif current_user.role == 'staff' %}
-                                <a href="#">Dashboard</a>
-                                <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
-                                <a href="#">Bookings</a>
-                                <a href="#">Calendar</a>
-                            {% else %}
-                                <a href="{{ url_for('main.landing') }}">Home</a>
-                                <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
-                                <a href="#">Bookings</a>
-                            {% endif %}
-                        {% else %}
-                            <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
-                        {% endif %}
-                        <a href="#">About Us</a>
-                    </nav>
-                    <nav class="header-text flex justify-end gap-2">
-                        {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.logout') }}" class="rounded-md btn btn-sm prm-btn">Log Out</a>
-                        {% else %}
-                            <a href="{{ url_for('auth.login') }}" class="rounded-md btn btn-sm prm-btn">Log In</a>
-                            <a href="{{ url_for('auth.register') }}" class="rounded-md btn btn-sm scnd-btn">Sign Up</a>
-                        {% endif %}
-                    </nav>
+            <!-- Logo -->
+            <div class="logo-header flex justify-start">
+                <a href="{{ url_for('main.landing') }}">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Liza's Cakehouse logo">
+                </a>
+                <span class="brand-name-header">Liza's Cake House</span>
+            </div>
 
-                </div>
-        </section>
+            <!-- Main navigation -->
+            <nav class="header-text flex justify-center" aria-label="Main navigation">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                        <a href="#">Dashboard</a>
+                        <a href="{{ url_for('admin.gallery') }}">Gallery</a>
+                        <a href="#">Bookings</a>
+                        <a href="#">Calendar</a>
+                        <a href="#">Admin Panel</a>
+                    {% elif current_user.role == 'staff' %}
+                        <a href="#">Dashboard</a>
+                        <a href="{{ url_for('staff.gallery') }}">Gallery</a>
+                        <a href="#">Bookings</a>
+                        <a href="#">Calendar</a>
+                    {% else %}
+                        <a href="{{ url_for('main.home') }}">Home</a>
+                        <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
+                        <a href="{{ url_for('main.booking_page') }}">Bookings</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
+                {% endif %}
+                <a href="{{ url_for('main.AboutUs') }}">About Us</a>
+            </nav>
+
+            <!-- Auth navigation -->
+            <nav class="header-text flex justify-end gap-2" aria-label="Account navigation">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.logout') }}" class="rounded-md btn btn-sm prm-btn">Log Out</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="rounded-md btn btn-sm prm-btn">Log In</a>
+                    <a href="{{ url_for('auth.register') }}" class="rounded-md btn btn-sm scnd-btn">Sign Up</a>
+                {% endif %}
+            </nav>
+
+        </div>
     </header>
 
-    {% block content %}   {% endblock %}
-<footer>
-    <div class="footer-top">
- 
-      <!-- Brand -->
-      <div class="brand">
-        <div class="brand-avatar">L</div>
-        <div class="brand-text">
-          <span class="brand-name">Liza's CakeHouse</span>
-          <span class="brand-tagline">Baked with love</span>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-top">
+
+            <!-- Brand -->
+            <div class="brand">
+                <div class="brand-avatar" aria-hidden="true">L</div>
+                <div class="brand-text">
+                    <span class="brand-name">Liza's CakeHouse</span>
+                    <span class="brand-tagline">Baked with love</span>
+                </div>
+            </div>
+
+            <!-- Contact info -->
+            <address>
+                <ul class="contact-list">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7607a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        51 M Acevida, Siniloan, Laguna
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7607a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <polyline points="2,4 12,13 22,4"/>
+                        </svg>
+                        <a href="mailto:lizascakehouse@yahoo.com">lizascakehouse@yahoo.com</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7607a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                        </svg>
+                        <a href="https://www.facebook.com/LizasCakeHouse/" rel="noopener noreferrer">Liza's CakeHouse</a>
+                    </li>
+                </ul>
+            </address>
+
         </div>
-      </div>
- 
-      <!-- Contact -->
-      <ul class="contact-list">
-        <li>
-          <!-- Location icon -->
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7607a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          51 M Acevida, Siniloan, Laguna
-        </li>
-        <li>
-          <!-- Mail icon -->
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7607a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"/>
-            <polyline points="2,4 12,13 22,4"/>
-          </svg>
-          lizascakehouse@gmail.com
-        </li>
-        <li>
-          <!-- Facebook icon -->
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7607a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-          </svg>
-          Liza's CakeHouse
-        </li>
-      </ul>
- 
-    </div>
- 
-    <div class="footer-bottom">
-      <ul class="footer-nav">
-        <li><a href="#">About us</a></li>
-        <li><a href="#">Contact us</a></li>
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-      </ul>
-      <p class="copyright">Copyright © 2018 • Lift Media Inc.</p>
-    </div>
-</footer>
-    <!-- Your custom JS -->
-     
+
+        <div class="footer-bottom">
+            <nav aria-label="Footer navigation">
+                <ul class="footer-nav">
+                    <li><a href="#">About us</a></li>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </nav>
+            <small class="copyright">Copyright &copy; 2018 &bull; Liza's Cakehouse</small>
+        </div>
+    </footer>
+
     <script src="{{ url_for('static', filename='javascript/index.js') }}"></script>
 </body>
 </html>

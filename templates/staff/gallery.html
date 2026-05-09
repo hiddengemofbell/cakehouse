@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %} Gallery — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<section class="gllry">
+
+  <!-- Page Header -->
+  <header class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <span class="page-label">Staff</span>
+      <h1 class="page-title">The <em>Gallery</em></h1>
+    </div>
+    {% if can_upload %}
+    <button class="cta-btn1" onclick="document.getElementById('uploadModal').showModal()">
+      + Upload Photo
+    </button>
+    {% endif %}
+  </header>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <p class="flash-msg {{ 'flash-error' if category == 'error' else 'flash-success' }}"
+           role="alert">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Filter Bar -->
+  <nav class="filter-bar" aria-label="Gallery filter">
+    <span class="filter-label" aria-hidden="true">Filter</span>
+    <button class="filter-btn active" data-filter="all">All</button>
+    {% for cat in categories %}
+    <button class="filter-btn" data-filter="{{ cat.name }}">{{ cat.name }}</button>
+    {% endfor %}
+  </nav>
+
+  <!-- Gallery Grid -->
+  <div class="gallery-grid" style="margin-top:32px;">
+    {% for cake in cakes %}
+    <figure class="gallery-item" data-category="{{ cake.category }}">
+      {% if cake.image_url %}
+        <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+      {% else %}
+        <div class="img-placeholder" style="height:220px;">
+          <span class="cake-emoji" aria-hidden="true">🎂</span>
+        </div>
+      {% endif %}
+      <div class="overlay">
+        <span class="overlay-tag">{{ cake.category }}</span>
+        <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
+        <p class="overlay-uploader">Liza's Cakehouse</p>
+      </div>
+    </figure>
+    {% endfor %}
+  </div>
+
+  <p class="empty-state" id="emptyState" {% if cakes %}hidden{% endif %}>
+    <span aria-hidden="true">🎂</span>
+    No photos yet. Stay tuned!
+  </p>
+
+</section>
+
+<!-- Lightbox -->
+<dialog id="lightbox" class="lightbox-dialog" aria-label="Photo viewer">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close photo viewer">✕</button>
+  <div class="lightbox-inner">
+    <img id="lightboxImg" src="" alt="">
+    <div class="lightbox-info">
+      <span id="lightboxTag" class="overlay-tag"></span>
+      <p id="lightboxName" class="lightbox-name"></p>
+      <p class="lightbox-uploader">Liza's Cakehouse</p>
+    </div>
+  </div>
+</dialog>
+
+{% if can_upload %}
+<!-- Upload Modal -->
+<dialog id="uploadModal" class="modal" aria-labelledby="uploadModalTitle">
+  <div class="modal-box">
+    <h2 id="uploadModalTitle" class="font-bold text-lg mb-4">Upload Cake Photo</h2>
+    <p class="modal-note">Your photo will be reviewed by an admin before it appears in the gallery.</p>
+    <form action="{{ url_for('staff.upload_cake') }}" method="POST" enctype="multipart/form-data">
+      <div class="flex flex-col gap-3">
+        <label for="design_name" class="sr-only">Cake name</label>
+        <input type="text" id="design_name" name="design_name" placeholder="Cake name"
+               class="input input-bordered w-full" required>
+
+        <label for="description" class="sr-only">Description</label>
+        <textarea id="description" name="description" placeholder="Description (optional)"
+                  class="textarea textarea-bordered w-full"></textarea>
+
+        <label for="up_category" class="sr-only">Category</label>
+        <select id="up_category" name="category" class="select select-bordered w-full"
+                required onchange="toggleNewCat(this, 'up_new_cat')">
+          <option value="" disabled selected>Select category</option>
+          {% for cat in categories %}
+          <option value="{{ cat.name }}">{{ cat.name }}</option>
+          {% endfor %}
+          <option value="__new__">+ Add Category</option>
+        </select>
+        <input type="text" id="up_new_cat" placeholder="Type new category name…"
+               class="input input-bordered w-full" style="display:none;">
+
+        <label for="image" class="sr-only">Photo</label>
+        <input type="file" id="image" name="image" accept="image/*"
+               class="file-input file-input-bordered w-full" required>
+      </div>
+      <div class="modal-action">
+        <button type="submit" class="btn scnd-btn">Submit for Approval</button>
+        <button type="button" class="btn"
+                onclick="document.getElementById('uploadModal').close()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+{% endif %}
+
+<script>
+(function () {
+  /* ── Add Category toggle ── */
+  window.toggleNewCat = function (select, inputId) {
+    const input = document.getElementById(inputId);
+    if (select.value === '__new__') {
+      select.removeAttribute('name');
+      input.name = 'category';
+      input.style.display = 'block';
+      input.required = true;
+      input.focus();
+    } else {
+      select.name = 'category';
+      input.name = '';
+      input.style.display = 'none';
+      input.required = false;
+      input.value = '';
+    }
+  };
+
+  /* ── Filter ── */
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const items = document.querySelectorAll('.gallery-item');
+  const emptyState = document.getElementById('emptyState');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      let visible = 0;
+      items.forEach(item => {
+        const match = filter === 'all' || item.dataset.category === filter;
+        item.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      emptyState.hidden = visible > 0;
+    });
+  });
+
+  /* ── Lightbox ── */
+  const dialog = document.getElementById('lightbox');
+  const lbImg  = document.getElementById('lightboxImg');
+  const lbTag  = document.getElementById('lightboxTag');
+  const lbName = document.getElementById('lightboxName');
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      const img = item.querySelector('img');
+      lbImg.src  = img ? img.src : '';
+      lbImg.alt  = img ? img.alt : '';
+      lbTag.textContent  = item.querySelector('.overlay-tag').textContent;
+      lbName.textContent = item.querySelector('.overlay-title').textContent;
+      dialog.showModal();
+    });
+  });
+
+  document.getElementById('lightboxClose').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+})();
+</script>
+{% endblock %}

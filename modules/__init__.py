@@ -12,13 +12,20 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 def create_app():
-    app = Flask(__name__, template_folder='../templates', static_folder='../static') 
+    app = Flask(__name__, template_folder='../templates', static_folder='../static')
     #../templates points it to the correct templates folder. same applies to static
-
 
     app.config.from_object(Config)
     db.init_app(app)
     login_manager.init_app(app)
+
+    # Configure Cloudinary for image uploads
+    import cloudinary
+    cloudinary.config(
+        cloud_name=app.config.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=app.config.get('CLOUDINARY_API_KEY'),
+        api_secret=app.config.get('CLOUDINARY_API_SECRET')
+    )
 
     from modules.main import main_bp
     from modules.auth import auth

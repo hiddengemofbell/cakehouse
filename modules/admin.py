@@ -1,15 +1,26 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 from datetime import date
 import calendar
+import os
+import cloudinary
+import cloudinary.uploader
 from modules import db
-from modules.models import User, Booking, CakeProgress, Cake, Feedback, StaffPermission
+from modules.models import User, Booking, CakeProgress, Cake, Feedback, StaffPermission, Category
+from modules.decorators import admin_required
+
+# Configure Cloudinary directly from env vars (bypasses app.config timing issues)
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
 
 admin_bp = Blueprint('admin', __name__)
 
 # Admin dashboard - business stats and recent orders
 @admin_bp.route('/admin/dashboard')
-@login_required
+@admin_required
 def dashboard():
     total_orders = Booking.query.count()
     revenue = db.session.query(db.func.sum(Booking.total_price)).scalar() or 0
@@ -31,70 +42,123 @@ def dashboard():
         } for b in recent]
     })
 
-# View all cake designs (admin sees hidden ones too)
+# View all cake designs — approved + pending approval
 @admin_bp.route('/admin/gallery')
-@login_required
+@admin_required
 def gallery():
-    cakes = Cake.query.all()
-    return render_template('admin/gallery.html', cakes=cakes)
+    cakes      = Cake.query.filter_by(is_approved=True).all()
+    pending    = Cake.query.filter_by(is_approved=False).all()
+    categories = Category.query.order_by(Category.name).all()
+    return render_template('admin/gallery.html', cakes=cakes, pending=pending, categories=categories)
 
-# Add new cake design to gallery
-@admin_bp.route('/admin/gallery/add', methods=['GET', 'POST'])
-@login_required
+# Add new cake design (admin uploads are auto-approved)
+@admin_bp.route('/admin/gallery/add', methods=['POST'])
+@admin_required
 def add_cake():
-    if request.method == 'POST':
-        data = request.get_json() if request.is_json else request.form
-        new_cake = Cake(
-            design_name=data.get('design_name'),
-            description=data.get('description'),
-            category=data.get('category'),
-            base_price=data.get('base_price'),
-            image_url=data.get('image_url')
-        )
-        db.session.add(new_cake)
-        db.session.commit()
-        return jsonify({'message': 'Cake design added!', 'cake_id': new_cake.cake_id})
+    image_url = None
+    file = request.files.get('image')
+    if file and file.filename:
+        result = cloudinary.uploader.upload(file, folder='lizas-cakehouse')
+        image_url = result['secure_url']
 
-    return render_template('admin/gallery.html')
+    category = request.form.get('category', '').strip()
+
+    # Auto-save new category to the Category table if it doesn't exist yet
+    if category and not Category.query.filter_by(name=category).first():
+        db.session.add(Category(name=category))
+
+    new_cake = Cake(
+        design_name=request.form.get('design_name'),
+        description=request.form.get('description'),
+        category=category,
+        base_price=request.form.get('base_price') or 0,
+        image_url=image_url,
+        is_approved=True
+    )
+    db.session.add(new_cake)
+    db.session.commit()
+    flash('Photo uploaded successfully!', 'success')
+    return redirect(url_for('admin.gallery'))
+
+# Approve a staff-uploaded photo
+@admin_bp.route('/admin/gallery/<int:cake_id>/approve', methods=['POST'])
+@admin_required
+def approve_cake(cake_id):
+    cake = Cake.query.get_or_404(cake_id)
+    cake.is_approved = True
+    db.session.commit()
+    flash(f'"{cake.design_name}" approved and is now visible in the gallery.', 'success')
+    return redirect(url_for('admin.gallery'))
+
+# Reject (delete) a staff-uploaded photo
+@admin_bp.route('/admin/gallery/<int:cake_id>/reject', methods=['POST'])
+@admin_required
+def reject_cake(cake_id):
+    cake = Cake.query.get_or_404(cake_id)
+    Booking.query.filter_by(cake_id=cake_id).update({'cake_id': None})
+    db.session.delete(cake)
+    db.session.commit()
+    flash('Photo rejected and removed.', 'error')
+    return redirect(url_for('admin.gallery'))
+
+# Add a new category (from the Manage Categories modal)
+@admin_bp.route('/admin/categories/add', methods=['POST'])
+@admin_required
+def add_category():
+    name = request.form.get('name', '').strip()
+    if name and not Category.query.filter_by(name=name).first():
+        db.session.add(Category(name=name))
+        db.session.commit()
+        flash(f'Category "{name}" added.', 'success')
+    else:
+        flash('Category already exists or name is empty.', 'error')
+    return redirect(url_for('admin.gallery'))
+
+# Delete a category (admin only — does NOT delete cakes in that category)
+@admin_bp.route('/admin/categories/<int:category_id>/delete', methods=['POST'])
+@admin_required
+def delete_category(category_id):
+    cat = Category.query.get_or_404(category_id)
+    db.session.delete(cat)
+    db.session.commit()
+    flash(f'Category "{cat.name}" deleted.', 'success')
+    return redirect(url_for('admin.gallery'))
 
 # Edit existing cake design
-@admin_bp.route('/admin/gallery/<int:cake_id>/edit', methods=['GET', 'POST'])
-@login_required
+@admin_bp.route('/admin/gallery/<int:cake_id>/edit', methods=['POST'])
+@admin_required
 def edit_cake(cake_id):
     cake = Cake.query.get_or_404(cake_id)
-    if request.method == 'POST':
-        data = request.get_json() if request.is_json else request.form
-        cake.design_name = data.get('design_name', cake.design_name)
-        cake.description = data.get('description', cake.description)
-        cake.category = data.get('category', cake.category)
-        cake.base_price = data.get('base_price', cake.base_price)
-        cake.image_url = data.get('image_url', cake.image_url)
-        cake.is_visible = data.get('is_visible', cake.is_visible)
-        db.session.commit()
-        return jsonify({'message': 'Cake design updated!'})
+    cake.design_name = request.form.get('design_name', cake.design_name)
+    cake.description  = request.form.get('description', cake.description)
+    cake.category     = request.form.get('category', cake.category)
+    cake.is_visible   = 'is_visible' in request.form
 
-    return jsonify({
-        'cake_id': cake.cake_id,
-        'design_name': cake.design_name,
-        'description': cake.description,
-        'category': cake.category,
-        'base_price': str(cake.base_price),
-        'image_url': cake.image_url,
-        'is_visible': cake.is_visible
-    })
+    # Only replace image if a new file was uploaded
+    file = request.files.get('image')
+    if file and file.filename:
+        result = cloudinary.uploader.upload(file, folder='lizas-cakehouse')
+        cake.image_url = result['secure_url']
+
+    db.session.commit()
+    flash('Photo updated.', 'success')
+    return redirect(url_for('admin.gallery'))
 
 # Delete cake design from gallery
 @admin_bp.route('/admin/gallery/<int:cake_id>/delete', methods=['POST'])
-@login_required
+@admin_required
 def delete_cake(cake_id):
     cake = Cake.query.get_or_404(cake_id)
+    # Unlink any bookings referencing this cake before deleting
+    Booking.query.filter_by(cake_id=cake_id).update({'cake_id': None})
     db.session.delete(cake)
     db.session.commit()
-    return jsonify({'message': 'Cake design deleted!'})
+    flash('Photo deleted.', 'success')
+    return redirect(url_for('admin.gallery'))
 
 # View all users
 @admin_bp.route('/admin/users')
-@login_required
+@admin_required
 def manage_users():
     users = User.query.all()
     return jsonify([{
@@ -106,7 +170,7 @@ def manage_users():
 
 # Change user role
 @admin_bp.route('/admin/users/<int:user_id>/role', methods=['POST'])
-@login_required
+@admin_required
 def change_role(user_id):
     user = User.query.get_or_404(user_id)
     data = request.get_json() if request.is_json else request.form
@@ -137,7 +201,7 @@ def change_role(user_id):
 
 # Delete user account
 @admin_bp.route('/admin/users/<int:user_id>/delete', methods=['POST'])
-@login_required
+@admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     # Delete staff permissions if exists
@@ -150,7 +214,7 @@ def delete_user(user_id):
 
 # View staff permissions
 @admin_bp.route('/admin/users/<int:user_id>/permissions')
-@login_required
+@admin_required
 def view_permissions(user_id):
     user = User.query.get_or_404(user_id)
     if user.role != 'staff':
@@ -171,7 +235,7 @@ def view_permissions(user_id):
 
 # Toggle a specific staff permission
 @admin_bp.route('/admin/users/<int:user_id>/permissions', methods=['POST'])
-@login_required
+@admin_required
 def update_permissions(user_id):
     user = User.query.get_or_404(user_id)
     if user.role != 'staff':
@@ -204,7 +268,7 @@ def update_permissions(user_id):
 
 # Reports - sales data with monthly/yearly/custom view
 @admin_bp.route('/admin/reports')
-@login_required
+@admin_required
 def reports():
     view = request.args.get('view', 'month')
     start_date_str = request.args.get('start_date')
