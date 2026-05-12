@@ -44,6 +44,15 @@
         <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
         <p class="overlay-uploader">Liza's Cakehouse</p>
       </div>
+
+      <!-- Like button — redirects to login for unauthenticated users -->
+      <form method="POST"
+            action="{{ url_for('gallery.toggle_like', cake_id=cake.cake_id) }}"
+            class="reactions">
+        <button type="submit" class="react-btn like-btn"
+                aria-label="Like {{ cake.design_name }}">♡</button>
+      </form>
+
     </figure>
     {% endfor %}
   </div>
@@ -88,6 +97,11 @@
       });
       emptyState.hidden = visible > 0;
     });
+  });
+
+  /* ── Stop lightbox from opening when clicking the reactions area ── */
+  document.querySelectorAll('.reactions').forEach(div => {
+    div.addEventListener('click', e => e.stopPropagation());
   });
 
   /* ── Lightbox ── */

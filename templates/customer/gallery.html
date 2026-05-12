@@ -110,10 +110,15 @@
     });
   });
 
+  /* ── Stop lightbox from opening when clicking the reactions area ── */
+  document.querySelectorAll('.reactions').forEach(div => {
+    div.addEventListener('click', e => e.stopPropagation());
+  });
+
   /* ── Like toggle ── */
   document.querySelectorAll('.like-btn').forEach(btn => {
     btn.addEventListener('click', async e => {
-      e.stopPropagation(); // prevent lightbox from opening
+      e.stopPropagation();
       const id = btn.dataset.id;
       try {
         const res = await fetch(`/gallery/${id}/like`, { method: 'POST' });
@@ -140,7 +145,6 @@
 
   items.forEach(item => {
     item.addEventListener('click', e => {
-      if (e.target.closest('.like-btn')) return; // don't open lightbox on like click
       const img = item.querySelector('img');
       lbImg.src  = img ? img.src : '';
       lbImg.alt  = img ? img.alt : '';

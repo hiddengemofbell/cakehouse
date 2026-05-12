@@ -34,7 +34,6 @@
     --spacing: 40px;
 }
 
-
 /* ── BASE / GLOBAL ── */
 
 body {
@@ -59,17 +58,31 @@ h1, h2, h3, h4 {
 }
 
 .scnd-btn {
-    background-color: var(--accent);
-    color: var(--bg);
+    background: var(--bg);
+    background-size: 200% auto;
+    padding: 14px 36px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    border-radius: 50px;
+    border: 1px solid var(--accent);
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 8px 24px #ff7db040;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .scnd-btn:hover {
-    background-color: var(--accent) !important;
-    color: var(--bg) !important;
-    transform: scale(1.1) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px #ff7db055;
 }
 
 .cta-btn1 {
+    align-items: center;
+    justify-content: center;
     background: linear-gradient(to right, var(--accent) 0%, var(--card) 51%, var(--accent) 100%);
     background-size: 200% auto;
     padding: 14px 36px;
@@ -1085,7 +1098,7 @@ footer::after {
 }
 
 /* State classes toggled by JS after user reacts */
-.react-btn.liked    { background: var(--accent); }
+.react-btn.liked    { color: var(--accent); background: #ffffffcc; }
 .react-btn.disliked { background: var(--card); }
 
 /* Like count badge — bottom-right, shown on hover or when count > 0 */
@@ -1403,12 +1416,201 @@ footer::after {
     outline: 2px solid #f59e0b66;
 }
 
-/* Modal note text (staff upload modal) */
+/* ── Shared Modal Base ── */
+.admin-modal {
+    border: none;
+    border-radius: 20px;
+    padding: 0;
+    width: min(480px, 94vw);
+    box-shadow: 0 20px 60px #00000030;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    background: var(--bg);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.admin-modal::backdrop {
+    background: #00000060;
+    backdrop-filter: blur(4px);
+}
+
+.modal-card {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.modal-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: var(--text);
+    background: #f0f0f0;
+}
+
+/* Modal note text */
 .modal-note {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
+    font-size: 0.82rem;
+    color: #999;
+    margin: -8px 0 0;
     font-style: italic;
+    background: #fff8f0;
+    border: 1px solid #ffe0b2;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-field .input,
+.modal-field textarea,
+.modal-field select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.modal-field .input:focus,
+.modal-field textarea:focus,
+.modal-field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px #c7607a18;
+}
+
+.modal-field input[type="file"] {
+    padding: 8px 12px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #888;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modal-field input[type="file"]:hover {
+    border-color: var(--accent);
+    background: #fff5f7;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+.btn-primary-modal {
+    padding: 9px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-primary-modal:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.btn-secondary-modal {
+    padding: 9px 22px;
+    background: #f0f0f0;
+    color: #555;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary-modal:hover { background: #e4e4e4; }
+
+/* Pending pill badge on gallery card */
+.pending-pill {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Gallery header row with upload button on the right */
+.gllry-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.gllry-upload-btn {
+    flex-shrink: 0;
+    margin-bottom: 8px;
 }
 
 /* ── Lightbox ── */
@@ -1420,6 +1622,11 @@ footer::after {
     max-width: 90vw;
     max-height: 90vh;
     overflow: visible;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
 }
 
 /* Dim the background when lightbox is open */
@@ -1489,7 +1696,1196 @@ footer::after {
 }
 
 
-/* ── 10. DAISYUI OVERRIDES ── */
+/* ── 10. MY BOOKINGS PAGE ── */
+
+.mybookings-section {
+    max-width: 640px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+}
+
+.mybookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+/* Each booking card */
+.booking-card-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 24px;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Muted colour for cancelled/completed */
+.booking-card-item.status-cancelled {
+    background: #ccc;
+}
+
+.booking-card-item.status-accepted,
+.booking-card-item.status-completed {
+    background: #a8d5a2;
+}
+
+.bki-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bki-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.bki-value {
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.bki-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.bki-status {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bki-cancel {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.bki-cancel:hover { opacity: 1; }
+
+.bki-reason {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    font-style: italic;
+    max-width: 180px;
+    text-align: right;
+    line-height: 1.4;
+}
+
+/* Empty state */
+.mybookings-empty {
+    text-align: center;
+    color: #bbb;
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 48px 0 24px;
+}
+
+/* "+ Book an event" button */
+.bki-new-btn {
+    display: block;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.bki-new-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #c7607a08;
+}
+
+
+/* ── 11. CALENDAR PAGE ── */
+
+.cal-page {
+    max-width: 1100px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+}
+
+.cal-page-body {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 28px;
+    align-items: flex-start;
+}
+
+/* Left: calendar panel */
+.cal-panel {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+}
+
+.cal-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.cal-page-month {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.cal-page-nav {
+    font-size: 1.6rem;
+    color: var(--accent);
+    text-decoration: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    line-height: 1;
+}
+
+.cal-page-nav:hover { background: #c7607a15; }
+
+/* Legend */
+.cal-legend {
+    display: flex;
+    align-items: center;
+    font-size: 0.78rem;
+    color: #aaa;
+    margin-bottom: 16px;
+    gap: 6px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot.yellow { background: #f59e0b; }
+.legend-dot.red    { background: #ef4444; }
+
+/* Weekday row */
+.cal-page-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+/* Day grid */
+.cal-page-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.cal-page-day {
+    border-radius: 12px;
+    padding: 10px 6px 8px;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border: 1.5px solid transparent;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+}
+
+.cal-page-day.blank { background: none; border: none; }
+
+.cal-page-day.empty {
+    background: #fafafa;
+    border-color: var(--border);
+}
+
+.cal-page-day.partial {
+    background: #fffbeb;
+    border-color: #f59e0b88;
+    cursor: pointer;
+}
+
+.cal-page-day.partial:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px #f59e0b22;
+    border-color: #f59e0b;
+}
+
+.cal-page-day.full {
+    background: #fef2f2;
+    border-color: #ef444488;
+    cursor: pointer;
+}
+
+.cal-page-day.full:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px #ef444422;
+    border-color: #ef4444;
+}
+
+.cal-page-day.selected {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px #c7607a22 !important;
+}
+
+.cal-day-num {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.cal-day-dot {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #888;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.cal-page-day.full .cal-day-num   { color: #ef4444; }
+.cal-page-day.partial .cal-day-num { color: #d97706; }
+
+/* Right: orders side panel */
+.cal-orders-panel {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    min-height: 400px;
+    position: sticky;
+    top: 20px;
+    overflow: hidden;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.cal-order-card {
+    animation: slideInRight 0.25s ease both;
+}
+
+.cal-order-card:nth-child(1) { animation-delay: 0s; }
+.cal-order-card:nth-child(2) { animation-delay: 0.07s; }
+.cal-order-card:nth-child(3) { animation-delay: 0.14s; }
+
+.cal-orders-title {
+    animation: slideInRight 0.2s ease both;
+}
+
+.cal-orders-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 300px;
+    color: #ccc;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.cal-orders-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid var(--border);
+}
+
+/* Individual order card in side panel */
+.cal-order-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cal-order-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cal-order-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cal-order-name {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.cal-order-email {
+    display: block;
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.cal-order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cal-order-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text);
+}
+
+.cal-order-lbl {
+    color: #aaa;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.cal-order-notes {
+    flex-direction: column;
+    gap: 2px;
+}
+
+@media (max-width: 768px) {
+    .cal-page-body { grid-template-columns: 1fr; }
+    .cal-orders-panel { position: static; }
+}
+
+
+/* ── 12. MANAGE BOOKINGS (admin + staff) ── */
+
+.mgmt-section {
+    max-width: 780px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+}
+
+/* Filter tabs */
+.bkmgmt-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.bkmgmt-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.bkmgmt-tab:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.bkmgmt-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.tab-count {
+    background: #ffffff33;
+    border-radius: 50px;
+    padding: 0 7px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.bkmgmt-tab:not(.active) .tab-count {
+    background: #c7607a18;
+    color: var(--accent);
+}
+
+/* Booking cards */
+.bkmgmt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.bkmgmt-card {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Top row */
+.bkmgmt-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bkmgmt-customer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bkmgmt-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bkmgmt-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text);
+}
+
+.bkmgmt-email {
+    display: block;
+    font-size: 0.78rem;
+    color: #aaa;
+}
+
+/* Status badge */
+.bkmgmt-badge {
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bkmgmt-badge.status-pending   { background: #fff3cd; color: #856404; }
+.bkmgmt-badge.status-accepted  { background: #d4edda; color: #155724; }
+.bkmgmt-badge.status-declined  { background: #f8d7da; color: #721c24; }
+.bkmgmt-badge.status-cancelled { background: #e2e3e5; color: #383d41; }
+
+/* Detail row */
+.bkmgmt-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.bkmgmt-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bkmgmt-detail-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.bkmgmt-detail-value {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* Notes */
+.bkmgmt-notes {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.bkmgmt-notes.muted {
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+/* Action row */
+.bkmgmt-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.bkmgmt-btn {
+    padding: 7px 18px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.bkmgmt-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.accept-btn  { background: #d4edda; color: #155724; }
+.decline-btn { background: #f8d7da; color: #721c24; }
+.save-btn    { background: var(--accent); color: #fff; }
+
+.bkmgmt-inline-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bkmgmt-price-input {
+    width: 130px;
+    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+}
+
+.bkmgmt-price-input:focus {
+    border-color: var(--accent);
+}
+
+.bkmgmt-select {
+    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+}
+
+.bkmgmt-select:focus { border-color: var(--accent); }
+
+.bkmgmt-no-perm {
+    font-size: 0.8rem;
+    color: #bbb;
+    font-style: italic;
+}
+
+.mgmt-empty {
+    text-align: center;
+    color: #bbb;
+    font-size: 1rem;
+    padding: 60px 0;
+}
+
+/* Decline reason modal */
+.decline-dialog {
+    border: none;
+    border-radius: 20px;
+    padding: 0;
+    width: min(500px, 94vw);
+    box-shadow: 0 20px 60px #00000030;
+    /* Force true centering */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+.decline-dialog::backdrop {
+    background: #00000060;
+    backdrop-filter: blur(4px);
+}
+
+.decline-inner {
+    padding: 28px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.decline-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+/* Booking preview card inside modal */
+.decline-preview {
+    background: #fdf0f3;
+    border: 1.5px solid #f5c6cb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.decline-preview-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+}
+
+.decline-preview-label {
+    color: #aaa;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.decline-preview-value {
+    color: var(--text);
+    font-weight: 500;
+    text-align: right;
+}
+
+.decline-sub {
+    font-size: 0.83rem;
+    color: #aaa;
+    margin: 0;
+}
+
+.decline-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.decline-textarea:focus { border-color: #f5c6cb; }
+
+.decline-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Decline reason shown on declined cards */
+.bkmgmt-decline-reason {
+    font-size: 0.82rem;
+    color: #721c24;
+    background: #f8d7da;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .bkmgmt-details { grid-template-columns: 1fr 1fr; }
+    .bkmgmt-actions { flex-direction: column; align-items: flex-start; }
+}
+
+
+/* ── 12. BOOKING FORM ── */
+
+
+.booking-section {
+    max-width: 680px;
+    margin: 48px auto 80px;
+    padding: 0 20px;
+}
+
+.booking-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    margin-bottom: 24px;
+}
+
+.booking-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+}
+
+.bk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.bk-field:last-child {
+    margin-bottom: 0;
+}
+
+.bk-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bk-optional {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-muted, #aaa);
+}
+
+.bk-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    font-family: inherit;
+}
+
+.bk-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px #c7607a18;
+}
+
+.bk-input::placeholder {
+    color: #bbb;
+}
+
+.bk-textarea {
+    resize: vertical;
+    min-height: 96px;
+}
+
+/* Three-column row for Size / Layers / Motif */
+.bk-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+/* Two-column row for Date / Time */
+.bk-row.two-col {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Cake type radio grid */
+.cake-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 16px;
+}
+
+.cake-type-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--text);
+}
+
+.cake-type-option input[type="radio"] {
+    accent-color: var(--accent);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Submit button */
+.bk-submit {
+    width: 100%;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+/* Flash messages */
+.flash-wrap {
+    margin-bottom: 20px;
+}
+
+.flash {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.flash-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Date & Time picker wrappers */
+.datepicker-wrap,
+.timepicker-wrap {
+    position: relative;
+}
+
+.datepicker-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.datepicker-input {
+    cursor: pointer;
+    padding-right: 36px;
+}
+
+.timepicker-wrap .bk-input {
+    padding-right: 36px;
+}
+
+/* ── Custom Time Picker ── */
+.custom-timepicker {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 200;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 16px 14px;
+    box-shadow: 0 8px 32px #c7607a22;
+    width: 220px;
+}
+
+.tp-cols {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.tp-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.tp-arrow {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: var(--accent);
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    /* rotate the chevron to point up/down */
+    transform: rotate(90deg);
+    padding: 0;
+    line-height: 1;
+}
+
+.tp-arrow:last-child {
+    transform: rotate(-90deg);
+}
+
+.tp-arrow:hover {
+    background: #c7607a15;
+}
+
+.tp-scroll {
+    height: 120px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    scroll-behavior: smooth;
+}
+
+.tp-scroll::-webkit-scrollbar { display: none; }
+
+.tp-item {
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    color: var(--text);
+    cursor: pointer;
+    width: 44px;
+    text-align: center;
+    transition: background 0.15s, color 0.15s;
+}
+
+.tp-item:hover {
+    background: #c7607a12;
+    color: var(--accent);
+}
+
+.tp-item.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+}
+
+.tp-colon {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.tp-ampm-col {
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.tp-ampm-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    width: 44px;
+    letter-spacing: 0.5px;
+}
+
+.tp-ampm-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tp-ampm-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.tp-confirm {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.tp-confirm:hover { opacity: 0.88; }
+
+/* ── Custom Calendar ── */
+.custom-calendar {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 200;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    width: 272px;
+    box-shadow: 0 8px 32px #c7607a22;
+}
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.cal-month-year {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.cal-nav {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--accent);
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+    line-height: 1;
+    padding: 0;
+}
+
+.cal-nav:hover {
+    background: #c7607a15;
+}
+
+.cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.cal-day {
+    aspect-ratio: 1;
+    border: none;
+    background: none;
+    border-radius: 50%;
+    font-size: 0.82rem;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+    width: 100%;
+    padding: 0;
+}
+
+.cal-day:not(.blank):not(.disabled):hover {
+    background: #c7607a18;
+    color: var(--accent);
+}
+
+.cal-day.today {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.cal-day.selected {
+    background: var(--accent);
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.cal-day.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.cal-day.blank {
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    .bk-row { grid-template-columns: 1fr; }
+    .cake-type-grid { grid-template-columns: 1fr; }
+    .booking-card { padding: 24px 18px; }
+    .custom-calendar { width: 240px; }
+}
+
+
+/* ── 11. DAISYUI OVERRIDES ── */
 /*
    DaisyUI sets its own background on .input elements.
    This forces our --bg color on DaisyUI inputs (used in admin modals).

@@ -3,7 +3,72 @@
 {% block title %} My Bookings — Liza's Cakehouse {% endblock %}
 
 {% block content %}
-<section>
-  <h1>This is the Customer's Bookings Page</h1>
+
+
+<section class="mybookings-section">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <span class="page-label">My Orders</span>
+    <h1 class="page-title">My <em>Bookings</em></h1>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap" style="max-width:600px;margin:0 auto 20px;">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="mybookings-list">
+          <a href="{{ url_for('bookings.place_booking') }}" class="bki-new-btn">
+      + &nbsp; Book an event
+    </a>
+    {% if bookings %}
+      {% for b in bookings %}
+      <div class="booking-card-item status-{{ b.booking_status | lower }}">
+
+        <div class="bki-left">
+          <span class="bki-label">Type of Cake</span>
+          <span class="bki-value">{{ b.flavor }}</span>
+          <span class="bki-label" style="margin-top:6px;">Pick up date</span>
+          <span class="bki-value">
+            {{ b.pickup_date.strftime('%B %d, %Y') if b.pickup_date else '—' }}
+          </span>
+        </div>
+
+        <div class="bki-right">
+          <span class="bki-status">{{ b.booking_status }}</span>
+          {% if b.booking_status == 'Declined' and b.decline_reason %}
+          <span class="bki-reason">{{ b.decline_reason }}</span>
+          {% endif %}
+          {% if b.booking_status == 'Pending' %}
+          <form method="POST"
+                action="{{ url_for('bookings.cancel_booking', booking_id=b.booking_id) }}"
+                onsubmit="return confirm('Cancel this order?')">
+            <button type="submit" class="bki-cancel">Cancel Order</button>
+          </form>
+          {% endif %}
+        </div>
+
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="mybookings-empty">You haven't booked anything yet</p>
+    {% endif %}
+
+
+
+  </div>
+
 </section>
 {% endblock %}

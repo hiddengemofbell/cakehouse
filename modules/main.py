@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template
+from flask_login import current_user
 from modules.decorators import customer_required
+from modules.models import Booking
 
 main_bp = Blueprint('main', __name__)
 
@@ -23,4 +25,6 @@ def home():
 @main_bp.route('/booking_page')
 @customer_required
 def booking_page():
-    return render_template('customer/my_bookings.html')
+    bookings = Booking.query.filter_by(user_id=current_user.user_id)\
+                            .order_by(Booking.created_at.desc()).all()
+    return render_template('customer/my_bookings.html', bookings=bookings)

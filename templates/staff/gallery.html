@@ -6,39 +6,78 @@
 <section class="gllry">
 
   <!-- Page Header -->
-  <header class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-    <div>
-      <span class="page-label">Staff</span>
-      <h1 class="page-title">The <em>Gallery</em></h1>
+  <header class="page-header">
+    <div class="gllry-header-row">
+      <div>
+        <span class="page-label">Staff</span>
+        <h1 class="page-title">The <em>Gallery</em></h1>
+        <div class="divider" aria-hidden="true">
+          <span class="divider-line"></span>
+          <span class="divider-dot"></span>
+          <span class="divider-line r"></span>
+        </div>
+      </div>
+      <button class="cta-btn1 gllry-upload-btn"
+              onclick="document.getElementById('uploadModal').showModal()">
+        + Upload Photo
+      </button>
     </div>
-    {% if can_upload %}
-    <button class="cta-btn1" onclick="document.getElementById('uploadModal').showModal()">
-      + Upload Photo
-    </button>
-    {% endif %}
   </header>
 
   <!-- Flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      {% for category, message in messages %}
-        <p class="flash-msg {{ 'flash-error' if category == 'error' else 'flash-success' }}"
-           role="alert">{{ message }}</p>
-      {% endfor %}
+      <div class="flash-wrap" style="max-width:900px;margin:0 auto 16px;">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
     {% endif %}
   {% endwith %}
 
+  <!-- Pending Approval Section -->
+  {% if pending %}
+  <div class="pending-section">
+    <h2 class="pending-title">
+      Awaiting Admin Approval
+      <span class="pending-badge">{{ pending | length }}</span>
+    </h2>
+    <div class="gallery-grid">
+      {% for cake in pending %}
+      <figure class="gallery-item pending-item" data-category="{{ cake.category }}">
+        {% if cake.image_url %}
+          <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
+        {% else %}
+          <div class="img-placeholder" style="height:220px;">
+            <span class="cake-emoji" aria-hidden="true">🎂</span>
+          </div>
+        {% endif %}
+        <div class="overlay">
+          <span class="overlay-tag">{{ cake.category }}</span>
+          <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
+          <p class="overlay-uploader">Liza's Cakehouse</p>
+        </div>
+        <span class="pending-pill">Pending</span>
+      </figure>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Filter Bar -->
   <nav class="filter-bar" aria-label="Gallery filter">
-    <span class="filter-label" aria-hidden="true">Filter</span>
+    <span class="filter-label" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filter
+    </span>
     <button class="filter-btn active" data-filter="all">All</button>
     {% for cat in categories %}
     <button class="filter-btn" data-filter="{{ cat.name }}">{{ cat.name }}</button>
     {% endfor %}
   </nav>
 
-  <!-- Gallery Grid -->
-  <div class="gallery-grid" style="margin-top:32px;">
+  <!-- Approved Gallery Grid -->
+  <div class="gallery-grid">
     {% for cake in cakes %}
     <figure class="gallery-item" data-category="{{ cake.category }}">
       {% if cake.image_url %}
@@ -59,7 +98,7 @@
 
   <p class="empty-state" id="emptyState" {% if cakes %}hidden{% endif %}>
     <span aria-hidden="true">🎂</span>
-    No photos yet. Stay tuned!
+    No approved photos yet — check back soon!
   </p>
 
 </section>
@@ -77,49 +116,59 @@
   </div>
 </dialog>
 
-{% if can_upload %}
 <!-- Upload Modal -->
-<dialog id="uploadModal" class="modal" aria-labelledby="uploadModalTitle">
-  <div class="modal-box">
-    <h2 id="uploadModalTitle" class="font-bold text-lg mb-4">Upload Cake Photo</h2>
-    <p class="modal-note">Your photo will be reviewed by an admin before it appears in the gallery.</p>
-    <form action="{{ url_for('staff.upload_cake') }}" method="POST" enctype="multipart/form-data">
-      <div class="flex flex-col gap-3">
-        <label for="design_name" class="sr-only">Cake name</label>
-        <input type="text" id="design_name" name="design_name" placeholder="Cake name"
-               class="input input-bordered w-full" required>
+<dialog id="uploadModal" class="admin-modal" aria-labelledby="uploadModalTitle">
+  <div class="modal-card">
+    <div class="modal-card-header">
+      <h2 id="uploadModalTitle" class="modal-card-title">Upload Cake Photo</h2>
+      <button type="button" class="modal-close-btn"
+              onclick="document.getElementById('uploadModal').close()">✕</button>
+    </div>
+    <p class="modal-note">
+      📋 Your photo will be reviewed by an admin before it appears in the gallery.
+    </p>
+    <form action="{{ url_for('staff.upload_cake') }}" method="POST" enctype="multipart/form-data"
+          class="modal-form">
 
-        <label for="description" class="sr-only">Description</label>
-        <textarea id="description" name="description" placeholder="Description (optional)"
-                  class="textarea textarea-bordered w-full"></textarea>
+      <div class="modal-field">
+        <label class="modal-label" for="design_name">Cake Name</label>
+        <input class="input" type="text" id="design_name" name="design_name"
+               placeholder="e.g. Floral Dream Cake" required>
+      </div>
 
-        <label for="up_category" class="sr-only">Category</label>
-        <select id="up_category" name="category" class="select select-bordered w-full"
-                required onchange="toggleNewCat(this, 'up_new_cat')">
+      <div class="modal-field">
+        <label class="modal-label" for="description">Description <span style="font-weight:400;color:#aaa;">(Optional)</span></label>
+        <textarea class="input" id="description" name="description" rows="2"
+                  placeholder="Brief description of the cake design" style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label" for="up_category">Category</label>
+        <select class="input" id="up_category" name="category" required
+                onchange="toggleNewCat(this,'up_new_cat')">
           <option value="" disabled selected>Select category</option>
           {% for cat in categories %}
           <option value="{{ cat.name }}">{{ cat.name }}</option>
           {% endfor %}
-          <option value="__new__">+ Add Category</option>
         </select>
-        <input type="text" id="up_new_cat" placeholder="Type new category name…"
-               class="input input-bordered w-full" style="display:none;">
-
-        <label for="image" class="sr-only">Photo</label>
-        <input type="file" id="image" name="image" accept="image/*"
-               class="file-input file-input-bordered w-full" required>
+        <input class="input" type="text" id="up_new_cat" name=""
+               placeholder="Type new category name…" style="display:none;margin-top:8px;">
       </div>
-      <div class="modal-action">
-        <button type="submit" class="btn scnd-btn">Submit for Approval</button>
-        <button type="button" class="btn"
+
+      <div class="modal-field">
+        <label class="modal-label" for="image">Photo</label>
+        <input type="file" id="image" name="image" accept="image/*" required
+               class="file-input file-input-bordered w-full">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary-modal"
                 onclick="document.getElementById('uploadModal').close()">Cancel</button>
+        <button type="submit" class="btn-primary-modal">Submit for Approval</button>
       </div>
     </form>
   </div>
-  <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
-{% endif %}
-
 <script>
 (function () {
   /* ── Add Category toggle ── */
@@ -140,9 +189,9 @@
     }
   };
 
-  /* ── Filter ── */
+  /* ── Filter (approved only) ── */
   const filterBtns = document.querySelectorAll('.filter-btn');
-  const items = document.querySelectorAll('.gallery-item');
+  const items      = document.querySelectorAll('.gallery-grid:last-of-type .gallery-item');
   const emptyState = document.getElementById('emptyState');
 
   filterBtns.forEach(btn => {
@@ -166,7 +215,7 @@
   const lbTag  = document.getElementById('lightboxTag');
   const lbName = document.getElementById('lightboxName');
 
-  items.forEach(item => {
+  document.querySelectorAll('.gallery-item:not(.pending-item)').forEach(item => {
     item.addEventListener('click', () => {
       const img = item.querySelector('img');
       lbImg.src  = img ? img.src : '';

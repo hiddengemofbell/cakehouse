@@ -18,6 +18,9 @@ def create_app():
     app.config.from_object(Config)
     db.init_app(app)
     login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'You have to sign in first.'
+    login_manager.login_message_category = 'error'
 
     # Configure Cloudinary for image uploads
     import cloudinary

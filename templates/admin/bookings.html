@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %} Bookings — Liza's Cakehouse {% endblock %}
+{% block title %} Manage Bookings — Liza's Cakehouse {% endblock %}
 
 {% block content %}
 <section class="mgmt-section">
 
   <header class="page-header">
-    <span class="page-label">Staff</span>
+    <span class="page-label">Admin</span>
     <h1 class="page-title">Manage <em>Bookings</em></h1>
     <div class="divider" aria-hidden="true">
       <span class="divider-line"></span>
@@ -90,18 +90,17 @@
       <p class="bkmgmt-decline-reason">⚠ Reason: {{ b.decline_reason }}</p>
       {% endif %}
 
-      <!-- Actions (permission-gated) -->
+      <!-- Actions -->
       <div class="bkmgmt-actions">
 
-        {% if b.booking_status == 'Pending' and perm and perm.can_approve_orders %}
-          <form method="POST" action="{{ url_for('staff.respond_booking', booking_id=b.booking_id) }}?status={{ active }}" class="bkmgmt-inline-form">
-            <input type="hidden" name="booking_status" value="Accepted">
+        {% if b.booking_status == 'Pending' %}
+          <form method="POST" action="{{ url_for('admin.accept_booking', booking_id=b.booking_id) }}?status={{ active }}" class="bkmgmt-inline-form">
             <input class="bkmgmt-price-input" type="number" name="total_price" step="0.01" min="0"
                    placeholder="Set price (₱)" required>
             <button type="submit" class="bkmgmt-btn accept-btn">✓ Accept</button>
           </form>
           <button type="button" class="bkmgmt-btn decline-btn"
-                  data-action="{{ url_for('staff.respond_booking', booking_id=b.booking_id) }}?status={{ active }}"
+                  data-action="{{ url_for('admin.decline_booking', booking_id=b.booking_id) }}?status={{ active }}"
                   data-customer="{{ customer.name if customer else 'Unknown' }}"
                   data-cake="{{ b.flavor }}"
                   data-date="{{ b.pickup_date.strftime('%b %d, %Y') }}"
@@ -111,16 +110,15 @@
         {% endif %}
 
         {% if b.booking_status == 'Accepted' %}
-          {% if perm and perm.can_set_price %}
-          <form method="POST" action="{{ url_for('staff.set_price', booking_id=b.booking_id) }}" class="bkmgmt-inline-form">
+          <!-- Set price -->
+          <form method="POST" action="{{ url_for('admin.set_price', booking_id=b.booking_id) }}" class="bkmgmt-inline-form">
             <input class="bkmgmt-price-input" type="number" name="total_price" step="0.01" min="0"
                    placeholder="Set price (₱)"
                    value="{{ '%.2f' | format(b.total_price | float) if b.total_price else '' }}">
             <button type="submit" class="bkmgmt-btn save-btn">Save</button>
           </form>
-          {% endif %}
-          {% if perm and perm.can_update_progress %}
-          <form method="POST" action="{{ url_for('staff.update_progress', booking_id=b.booking_id) }}" class="bkmgmt-inline-form">
+          <!-- Update progress -->
+          <form method="POST" action="{{ url_for('admin.update_progress', booking_id=b.booking_id) }}" class="bkmgmt-inline-form">
             <select class="bkmgmt-select" name="cake_status">
               {% set prog_status = progress_map.get(b.booking_id, 'not_started') %}
               <option value="not_started" {% if prog_status == 'not_started' %}selected{% endif %}>Not started</option>
@@ -129,11 +127,6 @@
             </select>
             <button type="submit" class="bkmgmt-btn save-btn">Update</button>
           </form>
-          {% endif %}
-        {% endif %}
-
-        {% if b.booking_status == 'Accepted' and not perm %}
-          <span class="bkmgmt-no-perm">No actions assigned to you</span>
         {% endif %}
 
       </div>

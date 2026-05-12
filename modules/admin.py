@@ -156,6 +156,93 @@ def delete_cake(cake_id):
     flash('Photo deleted.', 'success')
     return redirect(url_for('admin.gallery'))
 
+# Manage all bookings
+@admin_bp.route('/admin/bookings')
+@admin_required
+def bookings():
+    status_filter = request.args.get('status', 'all')
+    query = Booking.query.order_by(Booking.created_at.desc())
+    if status_filter != 'all':
+        query = query.filter_by(booking_status=status_filter.capitalize())
+    all_bookings = query.all()
+    users = {u.user_id: u for u in User.query.all()}
+    # Latest progress per booking
+    progress_map = {}
+    for cp in CakeProgress.query.order_by(CakeProgress.updated_at.desc()).all():
+        if cp.booking_id not in progress_map:
+            progress_map[cp.booking_id] = cp.cake_status
+    counts = {
+        'all':       Booking.query.count(),
+        'pending':   Booking.query.filter_by(booking_status='Pending').count(),
+        'accepted':  Booking.query.filter_by(booking_status='Accepted').count(),
+        'declined':  Booking.query.filter_by(booking_status='Declined').count(),
+        'cancelled': Booking.query.filter_by(booking_status='Cancelled').count(),
+    }
+    return render_template('admin/bookings.html',
+                           bookings=all_bookings, users=users,
+                           progress_map=progress_map,
+                           counts=counts, active=status_filter)
+
+# Accept a booking (price required)
+@admin_bp.route('/admin/bookings/<int:booking_id>/accept', methods=['POST'])
+@admin_required
+def accept_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    price = request.form.get('total_price', '').strip()
+    if not price:
+        flash('Please set a price before accepting.', 'error')
+        return redirect(url_for('admin.bookings', status=request.args.get('status', 'all')))
+    booking.booking_status = 'Accepted'
+    booking.total_price = float(price)
+    db.session.commit()
+    flash('Booking accepted and price set.', 'success')
+    return redirect(url_for('admin.bookings', status=request.args.get('status', 'all')))
+
+# Decline a booking (reason required)
+@admin_bp.route('/admin/bookings/<int:booking_id>/decline', methods=['POST'])
+@admin_required
+def decline_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    reason = request.form.get('decline_reason', '').strip()
+    if not reason:
+        flash('Please provide a reason for declining.', 'error')
+        return redirect(url_for('admin.bookings', status=request.args.get('status', 'all')))
+    booking.booking_status = 'Declined'
+    booking.decline_reason = reason
+    db.session.commit()
+    flash('Booking declined.', 'error')
+    return redirect(url_for('admin.bookings', status=request.args.get('status', 'all')))
+
+# Set total price
+@admin_bp.route('/admin/bookings/<int:booking_id>/set_price', methods=['POST'])
+@admin_required
+def set_price(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    price = request.form.get('total_price', '').strip()
+    if price:
+        booking.total_price = float(price)
+        db.session.commit()
+        flash('Price updated.', 'success')
+    return redirect(url_for('admin.bookings', status='accepted'))
+
+# Update cake progress
+@admin_bp.route('/admin/bookings/<int:booking_id>/progress', methods=['POST'])
+@admin_required
+def update_progress(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    cake_status = request.form.get('cake_status')
+    if cake_status in ['not_started', 'ongoing', 'completed']:
+        progress = CakeProgress(
+            booking_id=booking_id,
+            cake_status=cake_status,
+            updated_by=current_user.user_id
+        )
+        db.session.add(progress)
+        db.session.commit()
+        flash('Progress updated.', 'success')
+    return redirect(url_for('admin.bookings', status='accepted'))
+
+
 # View all users
 @admin_bp.route('/admin/users')
 @admin_required
@@ -265,6 +352,49 @@ def update_permissions(user_id):
         'can_update_progress': perm.can_update_progress,
         'can_set_price': perm.can_set_price
     })
+
+# Calendar view
+@admin_bp.route('/admin/calendar')
+@admin_required
+def calendar():
+    from datetime import datetime as dt
+    import calendar as cal_mod
+    year  = int(request.args.get('year',  dt.today().year))
+    month = int(request.args.get('month', dt.today().month))
+
+    bookings = Booking.query.filter(
+        Booking.booking_status == 'Accepted',
+        db.extract('year',  Booking.pickup_date) == year,
+        db.extract('month', Booking.pickup_date) == month
+    ).all()
+
+    users = {u.user_id: u for u in User.query.all()}
+
+    by_day = {}
+    for b in bookings:
+        day = b.pickup_date.day
+        by_day.setdefault(day, []).append(b)
+
+    cal = cal_mod.monthcalendar(year, month)
+    month_name = dt(year, month, 1).strftime('%B %Y')
+
+    if month == 1:
+        prev_year, prev_month = year - 1, 12
+    else:
+        prev_year, prev_month = year, month - 1
+    if month == 12:
+        next_year, next_month = year + 1, 1
+    else:
+        next_year, next_month = year, month + 1
+
+    return render_template('calendar.html',
+        cal=cal, by_day=by_day, users=users,
+        month_name=month_name, year=year, month=month,
+        prev_year=prev_year, prev_month=prev_month,
+        next_year=next_year, next_month=next_month,
+        max_per_day=3, role='admin'
+    )
+
 
 # Reports - sales data with monthly/yearly/custom view
 @admin_bp.route('/admin/reports')

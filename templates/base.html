@@ -32,14 +32,14 @@
                     {% if current_user.role == 'admin' %}
                         <a href="#">Dashboard</a>
                         <a href="{{ url_for('admin.gallery') }}">Gallery</a>
-                        <a href="#">Bookings</a>
-                        <a href="#">Calendar</a>
+                        <a href="{{ url_for('admin.bookings') }}">Bookings</a>
+                        <a href="{{ url_for('admin.calendar') }}">Calendar</a>
                         <a href="#">Admin Panel</a>
                     {% elif current_user.role == 'staff' %}
                         <a href="#">Dashboard</a>
                         <a href="{{ url_for('staff.gallery') }}">Gallery</a>
-                        <a href="#">Bookings</a>
-                        <a href="#">Calendar</a>
+                        <a href="{{ url_for('staff.bookings') }}">Bookings</a>
+                        <a href="{{ url_for('staff.calendar') }}">Calendar</a>
                     {% else %}
                         <a href="{{ url_for('main.home') }}">Home</a>
                         <a href="{{ url_for('gallery.gallery') }}">Gallery</a>
@@ -56,8 +56,8 @@
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('auth.logout') }}" class="rounded-md btn btn-sm prm-btn">Log Out</a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="rounded-md btn btn-sm prm-btn">Log In</a>
-                    <a href="{{ url_for('auth.register') }}" class="rounded-md btn btn-sm scnd-btn">Sign Up</a>
+                    <a href="{{ url_for('auth.login') }}" class="scnd-btn">Log In</a>
+                    <a href="{{ url_for('auth.register') }}" class="cta-btn1">Sign Up</a>
                 {% endif %}
             </nav>
 

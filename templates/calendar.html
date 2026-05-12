@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %} Calendar — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<section class="cal-page">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <span class="page-label">{{ role | capitalize }}</span>
+    <h1 class="page-title">Pickup <em>Calendar</em></h1>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <div class="cal-page-body">
+
+    <!-- Calendar panel -->
+    <div class="cal-panel">
+
+      <!-- Month nav -->
+      <div class="cal-page-header">
+        <a class="cal-page-nav"
+           href="?year={{ prev_year }}&month={{ prev_month }}">&#8249;</a>
+        <span class="cal-page-month">{{ month_name }}</span>
+        <a class="cal-page-nav"
+           href="?year={{ next_year }}&month={{ next_month }}">&#8250;</a>
+      </div>
+
+      <!-- Legend -->
+      <div class="cal-legend">
+        <span class="legend-dot yellow"></span> Available
+        <span class="legend-dot red" style="margin-left:14px;"></span> Fully Booked
+      </div>
+
+      <!-- Weekday headers -->
+      <div class="cal-page-weekdays">
+        {% for d in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] %}
+        <span>{{ d }}</span>
+        {% endfor %}
+      </div>
+
+      <!-- Day grid -->
+      <div class="cal-page-grid">
+        {% for week in cal %}
+          {% for day in week %}
+            {% if day == 0 %}
+              <div class="cal-page-day blank"></div>
+            {% else %}
+              {% set count = by_day[day] | length if day in by_day else 0 %}
+              {% if count >= max_per_day %}
+                {% set state = 'full' %}
+              {% elif count > 0 %}
+                {% set state = 'partial' %}
+              {% else %}
+                {% set state = 'empty' %}
+              {% endif %}
+              <div class="cal-page-day {{ state }}"
+                   data-day="{{ day }}"
+                   data-count="{{ count }}">
+                <span class="cal-day-num">{{ day }}</span>
+                {% if count > 0 %}
+                <span class="cal-day-dot">{{ count }} order{{ 's' if count != 1 }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <!-- Orders side panel -->
+    <div class="cal-orders-panel" id="ordersPanel">
+      <div class="cal-orders-empty" id="ordersEmpty">
+        <span style="font-size:2rem;">📅</span>
+        <p>Click a date to see its orders</p>
+      </div>
+      <div id="ordersList" hidden>
+        <h3 class="cal-orders-title" id="ordersTitle"></h3>
+        <div id="ordersContent"></div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- Embed booking data as JSON for JS -->
+<script>
+const BY_DAY = {
+  {% for day, bookings in by_day.items() %}
+  "{{ day }}": [
+    {% for b in bookings %}
+    {
+      id:     {{ b.booking_id }},
+      name:   "{{ users[b.user_id].name | e if b.user_id in users else 'Unknown' }}",
+      email:  "{{ users[b.user_id].email | e if b.user_id in users else '' }}",
+      cake:   "{{ b.flavor | e }}",
+      size:   "{{ b.size | e if b.size else '—' }}",
+      notes:  "{{ b.design_notes | e if b.design_notes else '' }}",
+      price:  "{{ '₱%.2f' | format(b.total_price | float) if b.total_price else '—' }}",
+      time:   "{{ b.special_notes | e if b.special_notes else '' }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]{% if not loop.last %},{% endif %}
+  {% endfor %}
+};
+
+const MONTH = "{{ month_name }}";
+
+(function () {
+  const panel   = document.getElementById('ordersPanel');
+  const empty   = document.getElementById('ordersEmpty');
+  const list    = document.getElementById('ordersList');
+  let   title   = document.getElementById('ordersTitle');
+  let   content = document.getElementById('ordersContent');
+
+  document.querySelectorAll('.cal-page-day:not(.blank):not(.empty)').forEach(cell => {
+    cell.style.cursor = 'pointer';
+    cell.addEventListener('click', () => {
+      const day  = cell.dataset.day;
+      const orders = BY_DAY[day] || [];
+
+      // Highlight selected
+      document.querySelectorAll('.cal-page-day').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+
+      // Re-clone title to re-trigger animation
+      const newTitle = title.cloneNode(true);
+      newTitle.textContent = `${MONTH} ${day}`;
+      title.replaceWith(newTitle);
+
+      // Re-clone content container to re-trigger animations
+      const newContent = content.cloneNode(false);
+      content.replaceWith(newContent);
+      const activeContent = document.getElementById('ordersContent');
+
+      orders.forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'cal-order-card';
+        card.innerHTML = `
+          <div class="cal-order-top">
+            <span class="cal-order-avatar">${o.name[0].toUpperCase()}</span>
+            <div>
+              <span class="cal-order-name">${o.name}</span>
+              <span class="cal-order-email">${o.email}</span>
+            </div>
+          </div>
+          <div class="cal-order-details">
+            <div class="cal-order-row"><span class="cal-order-lbl">Cake</span><span>${o.cake}</span></div>
+            <div class="cal-order-row"><span class="cal-order-lbl">Size</span><span>${o.size}</span></div>
+            <div class="cal-order-row"><span class="cal-order-lbl">Price</span><span>${o.price}</span></div>
+            ${o.notes ? `<div class="cal-order-row cal-order-notes"><span class="cal-order-lbl">Notes</span><span>${o.notes}</span></div>` : ''}
+          </div>`;
+        activeContent.appendChild(card);
+      });
+
+      empty.hidden = true;
+      list.hidden  = false;
+      // Re-assign title reference after clone
+      title = document.getElementById('ordersTitle');
+    });
+  });
+
+  // Clicking empty days resets panel
+  document.querySelectorAll('.cal-page-day.empty').forEach(cell => {
+    cell.style.cursor = 'default';
+  });
+})();
+</script>
+{% endblock %}

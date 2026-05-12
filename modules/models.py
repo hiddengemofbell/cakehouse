@@ -41,6 +41,7 @@ class Booking(db.Model):
     special_notes = db.Column(db.Text, nullable=True)
     pickup_date = db.Column(db.Date, nullable=False)
     booking_status = db.Column(db.String(50), default='Pending')
+    decline_reason = db.Column(db.Text, nullable=True)
     budget = db.Column(db.Numeric(10, 2), nullable=False)
     pay_method = db.Column(db.String(50), nullable=False)
     total_price = db.Column(db.Numeric(10, 2), nullable=True)

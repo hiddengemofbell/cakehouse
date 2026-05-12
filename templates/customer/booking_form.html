@@ -1,1 +1,388 @@
+{% extends "base.html" %}
 
+{% block title %} Book a Cake — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<section class="booking-section">
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form class="booking-form"
+        method="POST"
+        action="{{ url_for('bookings.place_booking') }}">
+
+    <!-- ── Personal Information ── -->
+    <div class="booking-card">
+      <h2 class="booking-section-title">Personal Information</h2>
+
+      <div class="bk-field">
+        <label class="bk-label" for="name">Name</label>
+        <input class="bk-input" type="text" id="name" name="name"
+               value="{{ current_user.name }}" placeholder="Your Name" required>
+      </div>
+
+      <div class="bk-field">
+        <label class="bk-label" for="email">Email Address</label>
+        <input class="bk-input" type="email" id="email" name="email"
+               value="{{ current_user.email }}" placeholder="name@example.com" required>
+      </div>
+
+      <div class="bk-field">
+        <label class="bk-label" for="phone">Phone Number</label>
+        <input class="bk-input" type="tel" id="phone" name="phone"
+               placeholder="0XXX XXX XXXX" required>
+      </div>
+
+      <div class="bk-field">
+        <label class="bk-label" for="social">Social Media <span class="bk-optional">(Optional)</span></label>
+        <input class="bk-input" type="text" id="social" name="social"
+               placeholder="Instagram / Facebook">
+      </div>
+    </div>
+
+    <!-- ── Order Information ── -->
+    <div class="booking-card">
+      <h2 class="booking-section-title">Order Information</h2>
+
+      <!-- Type of Cake -->
+      <div class="bk-field">
+        <label class="bk-label">Type of Cake</label>
+        <div class="cake-type-grid">
+          {% set cake_types = [
+            'Birthday Cakes', 'Wedding Cakes', 'Graduation Cakes', 'Anniversary Cakes',
+            'Christening Cakes', 'Gender Reveal Cakes', 'Reunion Cakes', 'Minimalist Cakes',
+            'Printed Edible Cakes'
+          ] %}
+          {% for ct in cake_types %}
+          <label class="cake-type-option">
+            <input type="radio" name="cake_type" value="{{ ct }}"
+                   {% if loop.first %}required{% endif %}>
+            <span>{{ ct }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Theme / Size / Layers / Motif -->
+      <div class="bk-field">
+        <label class="bk-label" for="theme">Theme / Design</label>
+        <input class="bk-input" type="text" id="theme" name="theme"
+               placeholder="e.g. Floral, Unicorn, Marble..." required>
+      </div>
+
+      <div class="bk-row">
+        <div class="bk-field">
+          <label class="bk-label" for="size">Size</label>
+          <input class="bk-input" type="text" id="size" name="size"
+                 placeholder='e.g. 6", 8", 10"' required>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="layers">Layers</label>
+          <input class="bk-input" type="text" id="layers" name="layers"
+                 placeholder="e.g. 1, 2, 3">
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="motif">Motif / Color</label>
+          <input class="bk-input" type="text" id="motif" name="motif"
+                 placeholder="e.g. Pastel pink, Gold">
+        </div>
+      </div>
+
+      <!-- Cake Message -->
+      <div class="bk-field">
+        <label class="bk-label" for="cake_message">Cake Message</label>
+        <input class="bk-input" type="text" id="cake_message" name="cake_message"
+               placeholder="To / From (e.g. Happy Birthday, Ana! ♡ Mom)">
+      </div>
+
+      <!-- Pickup Date & Time -->
+      <div class="bk-row">
+        <div class="bk-field">
+          <label class="bk-label" for="pickup_date_display">Pickup Date</label>
+          <!-- Hidden real input submitted to server -->
+          <input type="hidden" id="pickup_date" name="pickup_date">
+          <!-- Visible display input that triggers custom calendar -->
+          <div class="datepicker-wrap">
+            <input class="bk-input datepicker-input" type="text" id="pickup_date_display"
+                   placeholder="Select a date" autocomplete="off" readonly required>
+            <span class="datepicker-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+            <div class="custom-calendar" id="customCalendar" hidden>
+              <div class="cal-header">
+                <button type="button" class="cal-nav" id="calPrev">&#8249;</button>
+                <span class="cal-month-year" id="calMonthYear"></span>
+                <button type="button" class="cal-nav" id="calNext">&#8250;</button>
+              </div>
+              <div class="cal-weekdays">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
+                <span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+              <div class="cal-days" id="calDays"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="pickup_time_display">Pickup Time</label>
+          <input type="hidden" id="pickup_time" name="pickup_time">
+          <div class="timepicker-wrap">
+            <input class="bk-input datepicker-input" type="text" id="pickup_time_display"
+                   placeholder="Select a time" autocomplete="off" readonly>
+            <span class="datepicker-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <div class="custom-timepicker" id="customTimepicker" hidden>
+              <div class="tp-cols">
+                <!-- Hours -->
+                <div class="tp-col">
+                  <button type="button" class="tp-arrow" id="hrUp">&#8249;</button>
+                  <div class="tp-scroll" id="hrList"></div>
+                  <button type="button" class="tp-arrow" id="hrDown">&#8250;</button>
+                </div>
+                <span class="tp-colon">:</span>
+                <!-- Minutes -->
+                <div class="tp-col">
+                  <button type="button" class="tp-arrow" id="minUp">&#8249;</button>
+                  <div class="tp-scroll" id="minList"></div>
+                  <button type="button" class="tp-arrow" id="minDown">&#8250;</button>
+                </div>
+                <!-- AM/PM -->
+                <div class="tp-col tp-ampm-col">
+                  <button type="button" class="tp-ampm-btn" id="amBtn">AM</button>
+                  <button type="button" class="tp-ampm-btn" id="pmBtn">PM</button>
+                </div>
+              </div>
+              <button type="button" class="tp-confirm" id="tpConfirm">Set Time</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Flavor -->
+      <div class="bk-field">
+        <label class="bk-label" for="flavor">Flavor</label>
+        <select class="bk-input" id="flavor" name="flavor" required>
+          <option value="" disabled selected>Select a flavor</option>
+          <option value="Chocolate">Chocolate</option>
+          <option value="Vanilla">Vanilla</option>
+          <option value="Red Velvet">Red Velvet</option>
+          <option value="Matcha">Matcha</option>
+          <option value="Strawberry">Strawberry</option>
+          <option value="Caramel">Caramel</option>
+        </select>
+      </div>
+
+      <!-- Quantity -->
+      <div class="bk-field">
+        <label class="bk-label" for="quantity">Quantity</label>
+        <input class="bk-input" type="number" id="quantity" name="quantity"
+              min="1" value="1" required>
+      </div>
+
+      <!-- Budget -->
+      <div class="bk-field">
+        <label class="bk-label" for="budget">Budget</label>
+        <select class="bk-input" id="budget" name="budget" required>
+          <option value="" disabled selected>Select your budget range</option>
+          <option value="500">₱500 and below</option>
+          <option value="1000">₱500 - ₱1,000</option>
+          <option value="2000">₱1,000 - ₱2,000</option>
+          <option value="5000">₱2,000 - ₱5,000</option>
+          <option value="10000">₱5,000 - ₱10,000</option>
+          <option value="999999">No budget limit</option>
+        </select>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="bk-field">
+        <label class="bk-label" for="pay_method">Payment Method</label>
+        <select class="bk-input" id="pay_method" name="pay_method" required>
+          <option value="" disabled selected>Select payment method</option>
+          <option value="Cash">Cash</option>
+          <option value="GCash">GCash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+      </div>
+
+      <!-- Notes -->
+      <div class="bk-field">
+        <label class="bk-label" for="notes">Notes</label>
+        <textarea class="bk-input bk-textarea" id="notes" name="notes"
+                  placeholder="Additional details..."></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="cta-btn1 bk-submit">Done</button>
+
+  </form>
+</section>
+
+<script>
+(function () {
+  const display   = document.getElementById('pickup_date_display');
+  const hidden    = document.getElementById('pickup_date');
+  const calendar  = document.getElementById('customCalendar');
+  const calDays   = document.getElementById('calDays');
+  const calLabel  = document.getElementById('calMonthYear');
+
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+
+  let current = new Date();
+  let selected = null;
+
+  function render() {
+    const year  = current.getFullYear();
+    const month = current.getMonth();
+    calLabel.textContent = `${MONTHS[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+
+    calDays.innerHTML = '';
+
+    // Blank cells before first day
+    for (let i = 0; i < firstDay; i++) {
+      const blank = document.createElement('span');
+      blank.className = 'cal-day blank';
+      calDays.appendChild(blank);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-day';
+      btn.textContent = d;
+
+      const thisDate = new Date(year, month, d);
+
+      // Disable past dates
+      if (thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
+        btn.classList.add('disabled');
+        btn.disabled = true;
+      }
+
+      // Mark today
+      if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+        btn.classList.add('today');
+      }
+
+      // Mark selected
+      if (selected && d === selected.getDate() && month === selected.getMonth() && year === selected.getFullYear()) {
+        btn.classList.add('selected');
+      }
+
+      btn.addEventListener('click', () => {
+        selected = new Date(year, month, d);
+        // Format for display: Month D, Year
+        display.value = `${MONTHS[month]} ${d}, ${year}`;
+        // Format for server: YYYY-MM-DD
+        hidden.value = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        calendar.hidden = true;
+        render();
+      });
+
+      calDays.appendChild(btn);
+    }
+  }
+
+  display.addEventListener('click', e => {
+    e.stopPropagation();
+    calendar.hidden = !calendar.hidden;
+    if (!calendar.hidden) render();
+  });
+
+  document.getElementById('calPrev').addEventListener('click', () => {
+    current.setMonth(current.getMonth() - 1);
+    render();
+  });
+
+  document.getElementById('calNext').addEventListener('click', () => {
+    current.setMonth(current.getMonth() + 1);
+    render();
+  });
+
+  // Close calendar when clicking outside
+  document.addEventListener('click', e => {
+    if (!calendar.contains(e.target) && e.target !== display) {
+      calendar.hidden = true;
+    }
+  });
+
+  /* ── Custom Time Picker ── */
+  const tpDisplay  = document.getElementById('pickup_time_display');
+  const tpHidden   = document.getElementById('pickup_time');
+  const tp         = document.getElementById('customTimepicker');
+  const hrList     = document.getElementById('hrList');
+  const minList    = document.getElementById('minList');
+  const amBtn      = document.getElementById('amBtn');
+  const pmBtn      = document.getElementById('pmBtn');
+
+  let selHour = 12, selMin = 0, selPeriod = 'AM';
+
+  function buildList(el, count, padded, selected, onSelect) {
+    el.innerHTML = '';
+    for (let i = (padded ? 0 : 1); i <= count; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tp-item' + (i === selected ? ' active' : '');
+      btn.textContent = padded ? String(i).padStart(2, '0') : String(i).padStart(2, '0');
+      btn.addEventListener('click', () => onSelect(i));
+      el.appendChild(btn);
+    }
+    // Scroll active item into center
+    const active = el.querySelector('.active');
+    if (active) active.scrollIntoView({ block: 'center' });
+  }
+
+  function renderTP() {
+    buildList(hrList, 12, false, selHour, h => { selHour = h; renderTP(); });
+    buildList(minList, 59, true, selMin, m => { selMin = m; renderTP(); });
+    amBtn.classList.toggle('active', selPeriod === 'AM');
+    pmBtn.classList.toggle('active', selPeriod === 'PM');
+  }
+
+  amBtn.addEventListener('click', () => { selPeriod = 'AM'; renderTP(); });
+  pmBtn.addEventListener('click', () => { selPeriod = 'PM'; renderTP(); });
+
+  document.getElementById('hrUp').addEventListener('click', () => { selHour = selHour > 1 ? selHour - 1 : 12; renderTP(); });
+  document.getElementById('hrDown').addEventListener('click', () => { selHour = selHour < 12 ? selHour + 1 : 1; renderTP(); });
+  document.getElementById('minUp').addEventListener('click', () => { selMin = selMin > 0 ? selMin - 1 : 59; renderTP(); });
+  document.getElementById('minDown').addEventListener('click', () => { selMin = selMin < 59 ? selMin + 1 : 0; renderTP(); });
+
+  document.getElementById('tpConfirm').addEventListener('click', () => {
+    const hDisp  = String(selHour).padStart(2, '0');
+    const mDisp  = String(selMin).padStart(2, '0');
+    tpDisplay.value = `${hDisp}:${mDisp} ${selPeriod}`;
+    // Convert to 24h for server
+    let h24 = selHour % 12;
+    if (selPeriod === 'PM') h24 += 12;
+    tpHidden.value = `${String(h24).padStart(2,'0')}:${mDisp}`;
+    tp.hidden = true;
+  });
+
+  // Prevent clicks inside the picker from bubbling to document
+  tp.addEventListener('click', e => e.stopPropagation());
+
+  tpDisplay.addEventListener('click', e => {
+    e.stopPropagation();
+    tp.hidden = !tp.hidden;
+    if (!tp.hidden) renderTP();
+  });
+
+  document.addEventListener('click', e => {
+    if (!tp.contains(e.target) && e.target !== tpDisplay) tp.hidden = true;
+  });
+})();
+</script>
+{% endblock %}
