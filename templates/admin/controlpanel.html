@@ -1,0 +1,744 @@
+{% extends "base.html" %}
+
+{% block title %} Manage Users — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<style>
+/* ── Page layout ── */
+.um-section { padding: 0 0 40px; }
+
+/* ── Stat strip ── */
+.um-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.um-stat {
+  background: #fff;
+  border: 0.5px solid #ececec;
+  border-radius: 14px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.um-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--um-accent, #e91e8c);
+}
+.um-stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+.um-stat-val   { font-size: 24px; font-weight: 600; color: #2d2d2d; }
+
+/* ── Toolbar ── */
+.um-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.um-filter-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.um-fbtn {
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 99px;
+  border: 0.5px solid #ddd;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+}
+.um-fbtn.on { background: #e91e8c; color: #fff; border-color: #e91e8c; }
+.um-search {
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 0.5px solid #ddd;
+  background: #fff;
+  color: #333;
+  width: 200px;
+}
+.um-add-btn {
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #e91e8c;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Table ── */
+.um-table-wrap {
+  background: #fff;
+  border: 0.5px solid #ececec;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.um-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.um-table th {
+  font-size: 10px;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 10px 14px;
+  border-bottom: 0.5px solid #ececec;
+  text-align: left;
+  background: #fafafa;
+}
+.um-table td {
+  font-size: 13px;
+  color: #333;
+  padding: 11px 14px;
+  border-bottom: 0.5px solid #f0f0f0;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.um-table tr:last-child td { border-bottom: none; }
+.um-table tr:hover td { background: #fafafa; }
+
+/* Avatar */
+.um-av {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  flex-shrink: 0;
+}
+.av-pink   { background: #FBEAF0; color: #993556; }
+.av-blue   { background: #E6F1FB; color: #185FA5; }
+.av-green  { background: #EAF3DE; color: #3B6D11; }
+.av-amber  { background: #FAEEDA; color: #854F0B; }
+.av-purple { background: #EEEDFE; color: #3C3489; }
+
+/* Badges */
+.um-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+.badge-admin    { background: #EAF3DE; color: #3B6D11; }
+.badge-staff    { background: #E6F1FB; color: #185FA5; }
+.badge-customer { background: #F1EFE8; color: #5F5E5A; }
+
+/* Role select */
+.um-role-sel {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 0.5px solid #ddd;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Action buttons */
+.um-act-btn {
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 0.5px solid #ddd;
+  background: none;
+  cursor: pointer;
+  color: #666;
+}
+.um-act-btn:hover { background: #f5f5f5; }
+.um-act-perm { color: #185FA5; border-color: #b5d4f4; }
+.um-act-perm:hover { background: #E6F1FB; }
+.um-act-del  { color: #e53935; border-color: #f7c1c1; }
+.um-act-del:hover { background: #FCEBEB; }
+
+/* Pagination */
+.um-pg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 0.5px solid #ececec;
+}
+.um-pg-info { font-size: 11px; color: #888; }
+.um-pg-btns { display: flex; gap: 4px; }
+.um-pg-btn {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 0.5px solid #ddd;
+  background: transparent;
+  color: #333;
+  cursor: pointer;
+}
+.um-pg-btn.on { background: #e91e8c; color: #fff; border-color: #e91e8c; }
+
+/* ── Permissions panel ── */
+.perm-panel {
+  background: #fff;
+  border: 0.5px solid #ececec;
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+  display: none;
+}
+.perm-panel.open { display: block; }
+.perm-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d2d2d;
+  margin-bottom: 4px;
+}
+.perm-panel-sub { font-size: 12px; color: #888; margin-bottom: 16px; }
+.perm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.perm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafafa;
+  border: 0.5px solid #ececec;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.perm-name { font-size: 12px; color: #333; }
+.perm-toggle {
+  position: relative;
+  width: 36px; height: 20px;
+  flex-shrink: 0;
+}
+.perm-toggle input { opacity: 0; width: 0; height: 0; }
+.perm-slider {
+  position: absolute;
+  inset: 0;
+  background: #ddd;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.perm-slider::before {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  left: 3px; top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform .2s;
+}
+.perm-toggle input:checked + .perm-slider { background: #e91e8c; }
+.perm-toggle input:checked + .perm-slider::before { transform: translateX(16px); }
+.perm-save-btn {
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #e91e8c;
+  color: #fff;
+  cursor: pointer;
+}
+.perm-close-btn {
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 0.5px solid #ddd;
+  background: none;
+  color: #666;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+/* ── Confirm modal ── */
+.um-modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+}
+.um-modal-bg.open { display: flex; }
+.um-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 400px;
+  width: 92%;
+  position: relative;
+}
+.um-modal-icon { font-size: 32px; margin-bottom: 10px; }
+.um-modal h3 { font-size: 16px; font-weight: 600; color: #2d2d2d; margin-bottom: 8px; }
+.um-modal p  { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+.um-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.um-modal-cancel  { font-size: 13px; padding: 8px 16px; border-radius: 8px; border: 0.5px solid #ddd; background: none; cursor: pointer; color: #666; }
+.um-modal-confirm { font-size: 13px; padding: 8px 18px; border-radius: 8px; border: none; background: #e91e8c; color: #fff; cursor: pointer; }
+.um-modal-confirm.danger { background: #e53935; }
+
+/* Toast */
+.um-toast-area { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 6px; z-index: 9999; }
+.um-toast {
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #fff;
+  border: 0.5px solid #ececec;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  display: flex; align-items: center; gap: 8px;
+  animation: toastIn .2s ease;
+  max-width: 280px;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.toast-success { border-left: 3px solid #43a047; }
+.toast-error   { border-left: 3px solid #e53935; }
+.toast-info    { border-left: 3px solid #1e88e5; }
+</style>
+
+<section class="um-section">
+
+  <!-- Page header -->
+  <header class="page-header">
+    <span class="page-label">Admin</span>
+    <h1 class="page-title">Manage <em>Users</em></h1>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Stats -->
+  <div class="um-stats">
+    <div class="um-stat" style="--um-accent:#e91e8c">
+      <div class="um-stat-label">Total Users</div>
+      <div class="um-stat-val">{{ users | length }}</div>
+    </div>
+    <div class="um-stat" style="--um-accent:#185FA5">
+      <div class="um-stat-label">Staff</div>
+      <div class="um-stat-val">{{ users | selectattr('role','eq','staff') | list | length }}</div>
+    </div>
+    <div class="um-stat" style="--um-accent:#3B6D11">
+      <div class="um-stat-label">Customers</div>
+      <div class="um-stat-val">{{ users | selectattr('role','eq','customer') | list | length }}</div>
+    </div>
+    <div class="um-stat" style="--um-accent:#854F0B">
+      <div class="um-stat-label">Admins</div>
+      <div class="um-stat-val">{{ users | selectattr('role','eq','admin') | list | length }}</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="um-toolbar">
+    <div class="um-filter-row">
+      <button class="um-fbtn on" onclick="setFilter('all',this)">All</button>
+      <button class="um-fbtn" onclick="setFilter('admin',this)">Admin</button>
+      <button class="um-fbtn" onclick="setFilter('staff',this)">Staff</button>
+      <button class="um-fbtn" onclick="setFilter('customer',this)">Customer</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input class="um-search" type="text" placeholder="Search name or email…" oninput="searchUsers(this.value)">
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="um-table-wrap">
+    <table class="um-table">
+      <thead>
+        <tr>
+          <th style="width:36px">#</th>
+          <th style="width:160px">Name</th>
+          <th style="width:180px">Email</th>
+          <th style="width:80px">Role</th>
+          <th style="width:100px">Joined</th>
+          <th style="width:160px">Change Role</th>
+          <th style="width:130px">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="userTbody">
+        {% set av_colors = ['av-pink','av-blue','av-green','av-amber','av-purple'] %}
+        {% for u in users %}
+        <tr class="um-row" data-role="{{ u.role }}" data-name="{{ u.name | lower }}" data-email="{{ u.email | lower }}">
+          <td style="color:#aaa">{{ u.user_id }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="um-av {{ av_colors[loop.index0 % 5] }}">
+                {{ u.name[:2].upper() }}
+              </div>
+              <span style="font-weight:500">{{ u.name }}</span>
+            </div>
+          </td>
+          <td style="color:#666;font-size:12px">{{ u.email }}</td>
+          <td><span class="um-badge badge-{{ u.role }}">{{ u.role }}</span></td>
+          <td style="color:#aaa;font-size:12px">
+            {{ u.created_at.strftime('%b %d, %Y') if u.created_at else '—' }}
+          </td>
+          <td>
+            {% if u.role != 'admin' or users | selectattr('role','eq','admin') | list | length > 1 %}
+            <div style="display:flex;align-items:center;gap:6px">
+              <select class="um-role-sel rolesel" id="rolesel-{{ u.user_id }}" data-user-id="{{ u.user_id }}" data-current-role="{{ u.role }}">
+                <!-- Options populated by JavaScript -->
+              </select>
+              <button class="um-act-btn" onclick="promptRoleChange({{ u.user_id }}, '{{ u.name }}', '{{ u.role }}')">Save</button>
+            </div>
+            {% else %}
+            <span style="font-size:12px;color:#aaa">Protected</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:5px">
+              {% if u.role == 'staff' %}
+              <button class="um-act-btn um-act-perm"
+                      onclick="openPermPanel({{ u.user_id }}, '{{ u.name }}',
+                        {{ permissions[u.user_id].can_edit_gallery | lower if u.user_id in permissions else 'false' }},
+                        {{ permissions[u.user_id].can_approve_orders | lower if u.user_id in permissions else 'false' }},
+                        {{ permissions[u.user_id].can_update_progress | lower if u.user_id in permissions else 'false' }},
+                        {{ permissions[u.user_id].can_set_price | lower if u.user_id in permissions else 'false' }})">
+                Permissions
+              </button>
+              {% endif %}
+              {% if u.user_id != current_user.user_id %}
+              <button class="um-act-btn um-act-del" onclick="promptDelete({{ u.user_id }}, '{{ u.name }}', '{{ u.role }}')">
+                Delete
+              </button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="um-pg">
+      <span class="um-pg-info" id="pgInfo"></span>
+      <div class="um-pg-btns" id="pgBtns"></div>
+    </div>
+  </div>
+
+  <!-- Staff Permissions Panel -->
+  <div class="perm-panel" id="permPanel">
+    <div class="perm-panel-title" id="permPanelTitle">Staff Permissions</div>
+    <div class="perm-panel-sub" id="permPanelSub">Toggle what this staff member can do</div>
+    <form id="permForm" method="POST">
+      <div class="perm-grid">
+        <div class="perm-item">
+          <span class="perm-name">Edit Gallery</span>
+          <label class="perm-toggle">
+            <input type="checkbox" name="can_edit_gallery" id="perm_gallery">
+            <span class="perm-slider"></span>
+          </label>
+        </div>
+        <div class="perm-item">
+          <span class="perm-name">Approve Orders</span>
+          <label class="perm-toggle">
+            <input type="checkbox" name="can_approve_orders" id="perm_orders">
+            <span class="perm-slider"></span>
+          </label>
+        </div>
+        <div class="perm-item">
+          <span class="perm-name">Update Progress</span>
+          <label class="perm-toggle">
+            <input type="checkbox" name="can_update_progress" id="perm_progress">
+            <span class="perm-slider"></span>
+          </label>
+        </div>
+        <div class="perm-item">
+          <span class="perm-name">Set Prices</span>
+          <label class="perm-toggle">
+            <input type="checkbox" name="can_set_price" id="perm_price">
+            <span class="perm-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="perm-close-btn" onclick="closePermPanel()">Cancel</button>
+        <button type="submit" class="perm-save-btn">Save Permissions</button>
+      </div>
+    </form>
+  </div>
+
+</section>
+
+<!-- Role Management Section -->
+<section class="um-section">
+  <header class="page-header">
+    <span class="page-label">Admin</span>
+    <h1 class="page-title">Manage <em>Roles</em></h1>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <div style="background:#fff;border:0.5px solid #ececec;border-radius:14px;padding:20px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="font-size:14px;font-weight:600;color:#2d2d2d">Available Roles</h2>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="newRoleName" placeholder="New role name (e.g., supervisor)" style="font-size:12px;padding:7px 12px;border:0.5px solid #ddd;border-radius:6px;width:200px">
+        <button onclick="addNewRole()" style="font-size:13px;padding:7px 16px;background:#e91e8c;color:#fff;border:none;border-radius:6px;cursor:pointer">+ Add Role</button>
+      </div>
+    </div>
+    
+    <div id="rolesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+      <!-- Populated by JavaScript -->
+    </div>
+  </div>
+</section>
+
+<!-- Confirm modal -->
+<div class="um-modal-bg" id="modalBg">
+  <div class="um-modal">
+    <div class="um-modal-icon" id="modalIcon">⚠️</div>
+    <h3 id="modalTitle">Confirm</h3>
+    <p id="modalMsg">Are you sure?</p>
+    <div class="um-modal-actions">
+      <button class="um-modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="um-modal-confirm" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast area -->
+<div class="um-toast-area" id="toastArea"></div>
+
+<script>
+var curFilter = 'all', srchQ = '', curPage = 1, perPage = 10;
+var allRows = Array.from(document.querySelectorAll('.um-row'));
+
+/* ── Filter ── */
+function setFilter(f, btn) {
+  curFilter = f; curPage = 1;
+  document.querySelectorAll('.um-fbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderTable();
+}
+function searchUsers(v) { srchQ = v.toLowerCase(); curPage = 1; renderTable(); }
+
+function renderTable() {
+  var visible = allRows.filter(r => {
+    var mf = curFilter === 'all' || r.dataset.role === curFilter;
+    var mq = !srchQ || r.dataset.name.includes(srchQ) || r.dataset.email.includes(srchQ);
+    return mf && mq;
+  });
+  allRows.forEach(r => r.style.display = 'none');
+  var total = visible.length;
+  var pages = Math.ceil(total / perPage) || 1;
+  if (curPage > pages) curPage = pages;
+  var start = (curPage - 1) * perPage;
+  visible.slice(start, start + perPage).forEach(r => r.style.display = '');
+  document.getElementById('pgInfo').textContent = total
+    ? (start+1) + '–' + Math.min(start+perPage, total) + ' of ' + total
+    : '0 results';
+  var btns = '';
+  for (var i = 1; i <= pages; i++)
+    btns += '<button class="um-pg-btn' + (i===curPage?' on':'') + '" onclick="goP(' + i + ')">' + i + '</button>';
+  document.getElementById('pgBtns').innerHTML = btns;
+}
+function goP(p) { curPage = p; renderTable(); }
+
+/* ── Role change ── */
+function promptRoleChange(uid, name, oldRole) {
+  var newRole = document.getElementById('rolesel-' + uid).value;
+  if (newRole === oldRole) { toast('No change made', 'info'); return; }
+  document.getElementById('modalIcon').textContent = '🔄';
+  document.getElementById('modalTitle').textContent = 'Confirm role change';
+  document.getElementById('modalMsg').textContent = 'Change ' + name + "'s role from \"" + oldRole + '" to "' + newRole + '"?';
+  var btn = document.getElementById('modalConfirmBtn');
+  btn.className = 'um-modal-confirm';
+  btn.textContent = 'Confirm';
+  btn.onclick = function() {
+    fetch('/admin/users/' + uid + '/role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole })
+    }).then(r => r.json()).then(data => {
+      closeModal();
+      toast(data.message || 'Role updated', 'success');
+      setTimeout(() => location.reload(), 800);
+    }).catch(() => toast('Failed to update role', 'error'));
+  };
+  document.getElementById('modalBg').classList.add('open');
+}
+
+/* ── Delete user ── */
+function promptDelete(uid, name, role) {
+  if (role === 'admin') { toast('Cannot delete admin accounts', 'error'); return; }
+  document.getElementById('modalIcon').textContent = '🗑️';
+  document.getElementById('modalTitle').textContent = 'Delete user';
+  document.getElementById('modalMsg').textContent = 'Permanently delete ' + name + '? This cannot be undone.';
+  var btn = document.getElementById('modalConfirmBtn');
+  btn.className = 'um-modal-confirm danger';
+  btn.textContent = 'Delete';
+  btn.onclick = function() {
+    fetch('/admin/users/' + uid + '/delete', { method: 'POST' })
+      .then(r => r.json()).then(data => {
+        closeModal();
+        toast(name + ' deleted', 'success');
+        setTimeout(() => location.reload(), 800);
+      }).catch(() => toast('Failed to delete user', 'error'));
+  };
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+document.getElementById('modalBg').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+/* ── Permissions panel ── */
+function openPermPanel(uid, name, gallery, orders, progress, price) {
+  document.getElementById('permPanelTitle').textContent = name + ' — Permissions';
+  document.getElementById('permPanelSub').textContent = 'Toggle what ' + name + ' can do on the staff dashboard';
+  document.getElementById('permForm').action = '/admin/users/' + uid + '/permissions';
+  document.getElementById('perm_gallery').checked  = gallery;
+  document.getElementById('perm_orders').checked   = orders;
+  document.getElementById('perm_progress').checked = progress;
+  document.getElementById('perm_price').checked    = price;
+  var panel = document.getElementById('permPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closePermPanel() {
+  document.getElementById('permPanel').classList.remove('open');
+}
+
+document.getElementById('permForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = this;
+  var data = {
+    can_edit_gallery:    document.getElementById('perm_gallery').checked,
+    can_approve_orders:  document.getElementById('perm_orders').checked,
+    can_update_progress: document.getElementById('perm_progress').checked,
+    can_set_price:       document.getElementById('perm_price').checked
+  };
+  fetch(form.action, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(r => r.json()).then(d => {
+    toast('Permissions saved', 'success');
+    closePermPanel();
+  }).catch(() => toast('Failed to save permissions', 'error'));
+});
+
+/* ── Toast ── */
+function toast(msg, type) {
+  var icons = { success: '✓', error: '✕', info: 'ℹ' };
+  var el = document.createElement('div');
+  el.className = 'um-toast toast-' + type;
+  el.innerHTML = '<span>' + (icons[type]||'') + '</span> ' + msg;
+  document.getElementById('toastArea').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+/* ── Role Management ── */
+var allRoles = {{ roles | tojson | safe }};
+
+function renderRoles() {
+  var html = '';
+  allRoles.forEach(r => {
+    var isDefault = ['admin', 'staff', 'customer'].includes(r);
+    html += `<div style="background:#fafafa;border:0.5px solid #ececec;border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div>
+        <div style="font-size:12px;font-weight:500;color:#2d2d2d">${r}</div>
+        <div style="font-size:10px;color:#aaa">${isDefault ? '(default)' : '(custom)'}</div>
+      </div>
+      ${!isDefault ? `<button onclick="deleteRole('${r}')" style="background:#ffebee;border:0.5px solid #f7c1c1;color:#e53935;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer">Delete</button>` : ''}
+    </div>`;
+  });
+  document.getElementById('rolesList').innerHTML = html;
+  renderRoleDropdowns();
+}
+
+function renderRoleDropdowns() {
+  document.querySelectorAll('.rolesel').forEach(sel => {
+    var currentRole = sel.dataset.currentRole;
+    var html = '';
+    allRoles.forEach(r => {
+      html += `<option value="${r}" ${r === currentRole ? 'selected' : ''}>${r}</option>`;
+    });
+    sel.innerHTML = html;
+  });
+}
+
+function addNewRole() {
+  var input = document.getElementById('newRoleName');
+  var roleName = input.value.trim().toLowerCase();
+  
+  if (!roleName) {
+    toast('Please enter a role name', 'error');
+    return;
+  }
+  
+  if (!/^[a-z_]+$/.test(roleName)) {
+    toast('Role name can only contain letters and underscores', 'error');
+    return;
+  }
+  
+  if (allRoles.includes(roleName)) {
+    toast('Role already exists', 'error');
+    return;
+  }
+  
+  fetch('/admin/roles/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role_name: roleName })
+  }).then(r => r.json()).then(d => {
+    toast('Role added successfully', 'success');
+    allRoles = d.roles;
+    renderRoles();
+    input.value = '';
+    // Reload user dropdowns
+    setTimeout(() => location.reload(), 800);
+  }).catch(() => toast('Failed to add role', 'error'));
+}
+
+function deleteRole(roleName) {
+  if (!confirm(`Delete role "${roleName}"? Users with this role must be reassigned first.`)) return;
+  
+  fetch('/admin/roles/' + roleName + '/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  }).then(r => {
+    if (r.ok) {
+      return r.json();
+    } else {
+      return r.json().then(d => {
+        throw new Error(d.message || 'Failed to delete role');
+      });
+    }
+  }).then(d => {
+    toast('Role deleted', 'success');
+    allRoles = d.roles;
+    renderRoles();
+    setTimeout(() => location.reload(), 800);
+  }).catch(e => toast(e.message || 'Failed to delete role', 'error'));
+}
+
+/* ── Init ── */
+renderRoles();
+renderRoleDropdowns();
+renderTable();
+</script>
+{% endblock %}

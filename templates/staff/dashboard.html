@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %} Staff Dashboard — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+
+<script>
+  var MONTHLY_ORDERS = {{ monthly_orders | tojson | safe }};
+  var TOP_FLAVORS    = {{ top_flavors    | tojson | safe }};
+</script>
+
+<style>
+/* ── Dashboard stat strip ── */
+.sd-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.sd-stat-card {
+  background: #fff;
+  border: 0.5px solid #ececec;
+  border-radius: 14px;
+  padding: 15px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.sd-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--sd-accent, #e91e8c);
+}
+.sd-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+.sd-val   { font-size: 24px; font-weight: 600; color: #2d2d2d; line-height: 1; }
+.sd-sub   { font-size: 11px; color: #aaa; margin-top: 4px; }
+.sd-icon  {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 26px; opacity: .1;
+}
+
+/* ── Charts row ── */
+.sd-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) { .sd-charts { grid-template-columns: 1fr; } }
+
+.sd-chart-card {
+  background: #fff;
+  border: 0.5px solid #ececec;
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.sd-chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d2d2d;
+  margin-bottom: 14px;
+}
+
+/* ── Flavor bar list ── */
+.sd-bar-list { display: flex; flex-direction: column; gap: 10px; }
+.sd-bar-row  { display: flex; flex-direction: column; gap: 3px; }
+.sd-bar-meta { display: flex; justify-content: space-between; font-size: 11px; }
+.sd-bar-name  { color: #333; font-weight: 500; }
+.sd-bar-count { color: #888; }
+.sd-bar-track { background: #f3f3f3; border-radius: 99px; height: 7px; overflow: hidden; }
+.sd-bar-fill  { height: 100%; border-radius: 99px; background: #e91e8c; }
+</style>
+
+<section class="mgmt-section">
+
+  <!-- ── Dashboard Stats ── -->
+  <div class="sd-stat-grid">
+    <div class="sd-stat-card" style="--sd-accent:#e91e8c;">
+      <div class="sd-label">Total Bookings</div>
+      <div class="sd-val">{{ counts.all }}</div>
+      <div class="sd-sub">All time</div>
+      <span class="sd-icon">📋</span>
+    </div>
+    <div class="sd-stat-card" style="--sd-accent:#43a047;">
+      <div class="sd-label">Total Revenue</div>
+      <div class="sd-val">₱{{ '{:,.0f}'.format(total_revenue) }}</div>
+      <div class="sd-sub">Accepted orders</div>
+      <span class="sd-icon">💰</span>
+    </div>
+    <div class="sd-stat-card" style="--sd-accent:#fb8c00;">
+      <div class="sd-label">Pending</div>
+      <div class="sd-val">{{ counts.pending }}</div>
+      <div class="sd-sub">Needs action</div>
+      <span class="sd-icon">⏳</span>
+    </div>
+    <div class="sd-stat-card" style="--sd-accent:#1e88e5;">
+      <div class="sd-label">This Month</div>
+      <div class="sd-val">{{ this_month_orders }}</div>
+      <div class="sd-sub">₱{{ '{:,.0f}'.format(this_month_revenue) }} revenue</div>
+      <span class="sd-icon">📅</span>
+    </div>
+    <div class="sd-stat-card" style="--sd-accent:#43a047;">
+      <div class="sd-label">Accepted</div>
+      <div class="sd-val">{{ counts.accepted }}</div>
+      <div class="sd-sub">Confirmed orders</div>
+      <span class="sd-icon">✅</span>
+    </div>
+    <div class="sd-stat-card" style="--sd-accent:#e53935;">
+      <div class="sd-label">Declined</div>
+      <div class="sd-val">{{ counts.declined }}</div>
+      <div class="sd-sub">+ {{ counts.cancelled }} cancelled</div>
+      <span class="sd-icon">❌</span>
+    </div>
+  </div>
+
+  <!-- ── Charts ── -->
+  <div class="sd-charts">
+    <div class="sd-chart-card">
+      <div class="sd-chart-title">Monthly Orders Overview</div>
+      <div style="position:relative;height:200px;">
+        <canvas id="staffChart"></canvas>
+      </div>
+    </div>
+    <div class="sd-chart-card">
+      <div class="sd-chart-title">Top Flavors</div>
+      <div class="sd-bar-list" id="flavorBars"></div>
+    </div>
+  </div>
+
+  <!-- ── Page header (original) ── -->
+  <header class="page-header">
+    <span class="page-label">Staff</span>
+    <h1 class="page-title">Manage <em>Bookings</em></h1>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Filter tabs -->
+  <nav class="bkmgmt-tabs">
+    {% for tab, label in [('all','All'), ('pending','Pending'), ('accepted','Accepted'), ('declined','Declined'), ('cancelled','Cancelled')] %}
+    <a href="?status={{ tab }}"
+       class="bkmgmt-tab {% if active == tab %}active{% endif %}">
+      {{ label }}
+      <span class="tab-count">{{ counts[tab] }}</span>
+    </a>
+    {% endfor %}
+  </nav>
+
+  <!-- Bookings list -->
+  {% if bookings %}
+  <div class="bkmgmt-list">
+    {% for b in bookings %}
+    {% set customer = users.get(b.user_id) %}
+
+    <div class="bkmgmt-card">
+
+      <!-- Top row: customer + status badge -->
+      <div class="bkmgmt-top">
+        <div class="bkmgmt-customer">
+          <span class="bkmgmt-avatar">{{ customer.name[0].upper() if customer else '?' }}</span>
+          <div>
+            <span class="bkmgmt-name">{{ customer.name if customer else 'Unknown' }}</span>
+            <span class="bkmgmt-email">{{ customer.email if customer else '' }}</span>
+          </div>
+        </div>
+        <span class="bkmgmt-badge status-{{ b.booking_status | lower }}">{{ b.booking_status }}</span>
+      </div>
+
+      <!-- Detail row -->
+      <div class="bkmgmt-details">
+        <div class="bkmgmt-detail">
+          <span class="bkmgmt-detail-label">Type of Cake</span>
+          <span class="bkmgmt-detail-value">{{ b.flavor }}</span>
+        </div>
+        <div class="bkmgmt-detail">
+          <span class="bkmgmt-detail-label">Pickup Date</span>
+          <span class="bkmgmt-detail-value">{{ b.pickup_date.strftime('%b %d, %Y') }}</span>
+        </div>
+        <div class="bkmgmt-detail">
+          <span class="bkmgmt-detail-label">Size</span>
+          <span class="bkmgmt-detail-value">{{ b.size or '—' }}</span>
+        </div>
+        <div class="bkmgmt-detail">
+          <span class="bkmgmt-detail-label">Price</span>
+          <span class="bkmgmt-detail-value">
+            {% if b.total_price %}₱{{ '%.2f' | format(b.total_price | float) }}{% else %}—{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- Design notes -->
+      {% if b.design_notes %}
+      <p class="bkmgmt-notes">{{ b.design_notes }}</p>
+      {% endif %}
+      {% if b.special_notes %}
+      <p class="bkmgmt-notes muted">{{ b.special_notes }}</p>
+      {% endif %}
+      {% if b.booking_status == 'Declined' and b.decline_reason %}
+      <p class="bkmgmt-decline-reason">⚠ Reason: {{ b.decline_reason }}</p>
+      {% endif %}
+
+      <!-- Actions (respect staff permissions) -->
+      <div class="bkmgmt-actions">
+
+        {% if b.booking_status == 'Pending' and perm and perm.can_approve_orders %}
+          <form method="POST" action="{{ url_for('staff.respond_booking', booking_id=b.booking_id) }}?status={{ active }}" class="bkmgmt-inline-form">
+            <input type="hidden" name="booking_status" value="Accepted">
+            <input class="bkmgmt-price-input" type="number" name="total_price" step="0.01" min="0"
+                   placeholder="Set price (₱)" required>
+            <button type="submit" class="bkmgmt-btn accept-btn">✓ Accept</button>
+          </form>
+          <button type="button" class="bkmgmt-btn decline-btn"
+                  data-action="{{ url_for('staff.respond_booking', booking_id=b.booking_id) }}?status={{ active }}"
+                  data-customer="{{ customer.name if customer else 'Unknown' }}"
+                  data-cake="{{ b.flavor }}"
+                  data-date="{{ b.pickup_date.strftime('%b %d, %Y') }}"
+                  data-size="{{ b.size or '—' }}">
+            ✕ Decline
+          </button>
+        {% endif %}
+
+        {% if b.booking_status == 'Accepted' %}
+          {% if perm and perm.can_set_price %}
+          <form method="POST" action="{{ url_for('staff.set_price', booking_id=b.booking_id) }}" class="bkmgmt-inline-form">
+            <input class="bkmgmt-price-input" type="number" name="total_price" step="0.01" min="0"
+                   placeholder="Set price (₱)"
+                   value="{{ '%.2f' | format(b.total_price | float) if b.total_price else '' }}">
+            <button type="submit" class="bkmgmt-btn save-btn">Save</button>
+          </form>
+          {% endif %}
+          {% if perm and perm.can_update_progress %}
+          <form method="POST" action="{{ url_for('staff.update_progress', booking_id=b.booking_id) }}" class="bkmgmt-inline-form">
+            <select class="bkmgmt-select" name="cake_status">
+              {% set prog_status = progress_map.get(b.booking_id, 'not_started') %}
+              <option value="not_started" {% if prog_status == 'not_started' %}selected{% endif %}>Not started</option>
+              <option value="ongoing"     {% if prog_status == 'ongoing'     %}selected{% endif %}>Ongoing</option>
+              <option value="completed"   {% if prog_status == 'completed'   %}selected{% endif %}>Completed</option>
+            </select>
+            <button type="submit" class="bkmgmt-btn save-btn">Update</button>
+          </form>
+          {% endif %}
+        {% endif %}
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <p class="mgmt-empty">No {{ active }} bookings yet.</p>
+  {% endif %}
+
+</section>
+
+<!-- Decline reason modal -->
+<dialog id="declineModal" class="decline-dialog" aria-label="Reason for declining">
+  <div class="decline-inner">
+    <h3 class="decline-title">Reason for Declining</h3>
+    <div class="decline-preview">
+      <div class="decline-preview-row">
+        <span class="decline-preview-label">Customer</span>
+        <span class="decline-preview-value" id="dpCustomer"></span>
+      </div>
+      <div class="decline-preview-row">
+        <span class="decline-preview-label">Type of Cake</span>
+        <span class="decline-preview-value" id="dpCake"></span>
+      </div>
+      <div class="decline-preview-row">
+        <span class="decline-preview-label">Pickup Date</span>
+        <span class="decline-preview-value" id="dpDate"></span>
+      </div>
+      <div class="decline-preview-row">
+        <span class="decline-preview-label">Size</span>
+        <span class="decline-preview-value" id="dpSize"></span>
+      </div>
+    </div>
+    <p class="decline-sub">Please provide a reason. The customer will see this on their booking.</p>
+    <form id="declineForm" method="POST">
+      <input type="hidden" name="booking_status" value="Declined">
+      <textarea class="decline-textarea" name="decline_reason"
+                placeholder="e.g. Pickup date is unavailable, we're fully booked on that day."
+                required minlength="5"></textarea>
+      <div class="decline-actions">
+        <button type="button" class="bkmgmt-btn" id="declineCancel"
+                style="background:#e2e3e5;color:#383d41;">Cancel</button>
+        <button type="submit" class="bkmgmt-btn decline-btn">Confirm Decline</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  /* ── Decline modal ── */
+  const declineModal = document.getElementById('declineModal');
+  const declineForm  = document.getElementById('declineForm');
+  document.querySelectorAll('.decline-btn[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      declineForm.action = btn.dataset.action;
+      document.getElementById('dpCustomer').textContent = btn.dataset.customer;
+      document.getElementById('dpCake').textContent     = btn.dataset.cake;
+      document.getElementById('dpDate').textContent     = btn.dataset.date;
+      document.getElementById('dpSize').textContent     = btn.dataset.size;
+      declineForm.querySelector('textarea').value = '';
+      declineModal.showModal();
+    });
+  });
+  document.getElementById('declineCancel').addEventListener('click', () => declineModal.close());
+  declineModal.addEventListener('click', e => { if (e.target === declineModal) declineModal.close(); });
+
+  /* ── Monthly orders chart ── */
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  new Chart(document.getElementById('staffChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Orders',
+        data: MONTHLY_ORDERS,
+        borderColor: '#e91e8c',
+        backgroundColor: 'rgba(233,30,140,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: '#e91e8c',
+        pointRadius: 4,
+        tension: 0.35,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color:'rgba(0,0,0,0.05)' }, ticks: { font:{ size:11 }, color:'#888' } },
+        y: { grid: { color:'rgba(0,0,0,0.05)' }, ticks: { font:{ size:11 }, color:'#888' }, beginAtZero: true }
+      }
+    }
+  });
+
+  /* ── Top flavors bars ── */
+  var max = TOP_FLAVORS.length ? TOP_FLAVORS[0].count : 1;
+  document.getElementById('flavorBars').innerHTML = TOP_FLAVORS.map(f => `
+    <div class="sd-bar-row">
+      <div class="sd-bar-meta">
+        <span class="sd-bar-name">${f.flavor || 'Custom'}</span>
+        <span class="sd-bar-count">${f.count}</span>
+      </div>
+      <div class="sd-bar-track">
+        <div class="sd-bar-fill" style="width:${Math.round(f.count/max*100)}%"></div>
+      </div>
+    </div>`).join('') || '<p style="font-size:12px;color:#aaa;">No data yet.</p>';
+</script>
+{% endblock %}

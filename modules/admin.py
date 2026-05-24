@@ -3,11 +3,32 @@ from flask_login import current_user
 from datetime import date
 import calendar
 import os
+import json
 import cloudinary
 import cloudinary.uploader
 from modules import db
 from modules.models import User, Booking, CakeProgress, Cake, Feedback, StaffPermission, Category
 from modules.decorators import admin_required
+
+# Roles config file
+ROLES_FILE = os.path.join(os.path.dirname(__file__), '..', 'roles_config.json')
+
+def load_roles():
+    """Load available roles from config"""
+    default_roles = ['customer', 'staff', 'admin']
+    if os.path.exists(ROLES_FILE):
+        try:
+            with open(ROLES_FILE, 'r') as f:
+                data = json.load(f)
+                return data.get('roles', default_roles)
+        except:
+            return default_roles
+    return default_roles
+
+def save_roles(roles):
+    """Save roles to config"""
+    with open(ROLES_FILE, 'w') as f:
+        json.dump({'roles': roles}, f)
 
 # Configure Cloudinary directly from env vars (bypasses app.config timing issues)
 cloudinary.config(
@@ -19,28 +40,157 @@ cloudinary.config(
 admin_bp = Blueprint('admin', __name__)
 
 # Admin dashboard - business stats and recent orders
+# Replace your existing dashboard() route in admin.py with this:
+
 @admin_bp.route('/admin/dashboard')
 @admin_required
 def dashboard():
-    total_orders = Booking.query.count()
-    revenue = db.session.query(db.func.sum(Booking.total_price)).scalar() or 0
-    pending = Booking.query.filter_by(booking_status='Pending').count()
-    completed = Booking.query.filter_by(booking_status='Accepted').join(CakeProgress).filter(CakeProgress.cake_status == 'completed').count()
-    recent = Booking.query.order_by(Booking.created_at.desc()).limit(5).all()
+    from sqlalchemy import func, extract
+    from datetime import datetime, date
+    import calendar as cal_mod
 
-    return jsonify({
-        'total_orders': total_orders,
-        'revenue': str(revenue),
-        'pending': pending,
-        'completed': completed,
-        'recent_orders': [{
-            'booking_id': b.booking_id,
-            'user_id': b.user_id,
-            'design_notes': b.design_notes,
-            'pickup_date': b.pickup_date.isoformat(),
-            'booking_status': b.booking_status
-        } for b in recent]
-    })
+    today = date.today()
+
+    # ── Recent orders (last 20) ──
+    recent_orders_raw = db.session.query(
+        Booking.booking_id.label('id'),
+        User.name,
+        User.email,
+        Cake.design_name.label('cake_type'),
+        Booking.pickup_date.label('event_date'),
+        Booking.booking_status.label('status'),
+        Booking.total_price.label('total'),
+        Booking.flavor,
+        Booking.size,
+        Booking.quantity,
+        Booking.budget,
+        Booking.pay_method,
+        Booking.design_notes,
+        Booking.special_notes,
+        Booking.created_at
+    ).join(User, Booking.user_id == User.user_id)\
+     .outerjoin(Cake, Booking.cake_id == Cake.cake_id)\
+     .order_by(Booking.created_at.desc()).limit(20).all()
+
+    recent_orders = [
+        {
+            'id': o.id,
+            'name': o.name,
+            'email': o.email,
+            'cake_type': o.cake_type or 'Custom Design',
+            'event_date': o.event_date.isoformat() if o.event_date else None,
+            'event_time': '—',
+            'total': float(o.total) if o.total else 0,
+            'status': o.status.lower() if o.status else 'pending',
+            'flavor': o.flavor,
+            'size': o.size,
+            'quantity': o.quantity,
+            'budget': float(o.budget) if o.budget else 0,
+            'pay_method': o.pay_method,
+            'design_notes': o.design_notes,
+            'special_notes': o.special_notes,
+            'created_at': o.created_at.isoformat() if o.created_at else None
+        }
+        for o in recent_orders_raw
+    ]
+    # ── Summary stats ──
+    total_bookings  = Booking.query.count()
+    pending_count   = Booking.query.filter_by(booking_status='Pending').count()
+    accepted_count  = Booking.query.filter_by(booking_status='Accepted').count()
+    declined_count  = Booking.query.filter_by(booking_status='Declined').count()
+    cancelled_count = Booking.query.filter_by(booking_status='Cancelled').count()
+
+    total_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).filter_by(booking_status='Accepted').scalar()
+
+    # ── Monthly orders this year (for chart) ──
+    monthly_data = db.session.query(
+        extract('month', Booking.pickup_date).label('month'),
+        func.count(Booking.booking_id).label('count')
+    ).filter(
+        extract('year', Booking.pickup_date) == today.year
+    ).group_by('month').all()
+
+    monthly_orders = [0] * 12
+    for row in monthly_data:
+        monthly_orders[int(row.month) - 1] = row.count
+
+    # ── Monthly revenue this year (for chart) ──
+    monthly_rev_data = db.session.query(
+        extract('month', Booking.pickup_date).label('month'),
+        func.coalesce(func.sum(Booking.total_price), 0).label('revenue')
+    ).filter(
+        Booking.booking_status == 'Accepted',
+        extract('year', Booking.pickup_date) == today.year
+    ).group_by('month').all()
+
+    monthly_revenue = [0.0] * 12
+    for row in monthly_rev_data:
+        monthly_revenue[int(row.month) - 1] = float(row.revenue)
+
+    # ── Top 5 most ordered flavors ──
+    top_flavors = db.session.query(
+        Booking.flavor,
+        func.count(Booking.booking_id).label('count')
+    ).group_by(Booking.flavor)\
+     .order_by(func.count(Booking.booking_id).desc())\
+     .limit(5).all()
+
+    top_flavors = [{'flavor': r.flavor, 'count': r.count} for r in top_flavors]
+
+    # ── Top 5 most ordered sizes ──
+    top_sizes = db.session.query(
+        Booking.size,
+        func.count(Booking.booking_id).label('count')
+    ).group_by(Booking.size)\
+     .order_by(func.count(Booking.booking_id).desc())\
+     .limit(5).all()
+
+    top_sizes = [{'size': r.size, 'count': r.count} for r in top_sizes]
+
+    # ── This month stats ──
+    this_month_orders = Booking.query.filter(
+        extract('year',  Booking.created_at) == today.year,
+        extract('month', Booking.created_at) == today.month
+    ).count()
+
+    this_month_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).filter(
+        Booking.booking_status == 'Accepted',
+        extract('year',  Booking.pickup_date) == today.year,
+        extract('month', Booking.pickup_date) == today.month
+    ).scalar()
+
+    return render_template(
+        'admin/dashboard.html',
+        title='Admin Dashboard',
+        recent_orders=recent_orders,
+        total_bookings=total_bookings,
+        pending_count=pending_count,
+        accepted_count=accepted_count,
+        declined_count=declined_count,
+        cancelled_count=cancelled_count,
+        total_revenue=float(total_revenue),
+        monthly_orders=monthly_orders,
+        monthly_revenue=monthly_revenue,
+        top_flavors=top_flavors,
+        top_sizes=top_sizes,
+        this_month_orders=this_month_orders,
+        this_month_revenue=float(this_month_revenue),
+    )
+
+# Control Panel route - Manage users and assign roles
+@admin_bp.route('/admin/controlpanel')
+@admin_required
+def controlpanel():
+    users = User.query.all()
+    permissions = {}
+    for sp in StaffPermission.query.all():
+        permissions[sp.user_id] = sp
+    roles = load_roles()
+    return render_template('admin/controlpanel.html', users=users, permissions=permissions, roles=roles)
 
 # View all cake designs — approved + pending approval
 @admin_bp.route('/admin/gallery')
@@ -262,7 +412,9 @@ def change_role(user_id):
     user = User.query.get_or_404(user_id)
     data = request.get_json() if request.is_json else request.form
     new_role = data.get('role')
-    if new_role not in ['customer', 'staff', 'admin']:
+    available_roles = load_roles()
+    
+    if new_role not in available_roles:
         return jsonify({'message': 'Invalid role'}), 400
 
     old_role = user.role
@@ -298,6 +450,54 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User account deleted!'})
+
+# Get all available roles
+@admin_bp.route('/admin/roles')
+@admin_required
+def get_roles():
+    roles = load_roles()
+    return jsonify({'roles': roles})
+
+# Add a new role
+@admin_bp.route('/admin/roles/add', methods=['POST'])
+@admin_required
+def add_role():
+    data = request.get_json() if request.is_json else request.form
+    role_name = data.get('role_name', '').strip().lower()
+    
+    if not role_name or not role_name.replace('_', '').isalnum():
+        return jsonify({'message': 'Invalid role name'}), 400
+    
+    roles = load_roles()
+    if role_name in roles:
+        return jsonify({'message': 'Role already exists'}), 400
+    
+    roles.append(role_name)
+    save_roles(roles)
+    flash(f'Role "{role_name}" added successfully!', 'success')
+    return jsonify({'message': f'Role "{role_name}" created', 'roles': roles})
+
+# Delete a role
+@admin_bp.route('/admin/roles/<role_name>/delete', methods=['POST'])
+@admin_required
+def delete_role(role_name):
+    # Protect default roles
+    if role_name in ['customer', 'staff', 'admin']:
+        return jsonify({'message': 'Cannot delete default roles'}), 400
+    
+    roles = load_roles()
+    if role_name not in roles:
+        return jsonify({'message': 'Role not found'}), 404
+    
+    # Check if any users have this role
+    users_with_role = User.query.filter_by(role=role_name).count()
+    if users_with_role > 0:
+        return jsonify({'message': f'Cannot delete role: {users_with_role} user(s) have this role'}), 400
+    
+    roles.remove(role_name)
+    save_roles(roles)
+    flash(f'Role "{role_name}" deleted', 'success')
+    return jsonify({'message': f'Role "{role_name}" deleted', 'roles': roles})
 
 # View staff permissions
 @admin_bp.route('/admin/users/<int:user_id>/permissions')

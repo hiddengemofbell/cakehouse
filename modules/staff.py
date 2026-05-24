@@ -24,21 +24,101 @@ def check_permission(permission_name):
         return False
     return getattr(perm, permission_name, False)
 
-# Dashboard / Bookings list
+# Dashboard - Staff overview and stats
 @staff_bp.route('/staff/dashboard')
+@staff_required
+def dashboard():
+    from sqlalchemy import func, extract
+    from datetime import date
+
+    today = date.today()
+
+    # ── Dashboard stats ──
+    total_bookings = Booking.query.count()
+    pending_count = Booking.query.filter_by(booking_status='Pending').count()
+    accepted_count = Booking.query.filter_by(booking_status='Accepted').count()
+    declined_count = Booking.query.filter_by(booking_status='Declined').count()
+    cancelled_count = Booking.query.filter_by(booking_status='Cancelled').count()
+
+    total_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).filter_by(booking_status='Accepted').scalar()
+
+    this_month_orders = Booking.query.filter(
+        extract('year',  Booking.created_at) == today.year,
+        extract('month', Booking.created_at) == today.month
+    ).count()
+
+    this_month_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).filter(
+        Booking.booking_status == 'Accepted',
+        extract('year',  Booking.pickup_date) == today.year,
+        extract('month', Booking.pickup_date) == today.month
+    ).scalar()
+
+    # Monthly orders this year (for chart)
+    monthly_data = db.session.query(
+        extract('month', Booking.pickup_date).label('month'),
+        func.count(Booking.booking_id).label('count')
+    ).filter(
+        extract('year', Booking.pickup_date) == today.year
+    ).group_by('month').all()
+
+    monthly_orders = [0] * 12
+    for row in monthly_data:
+        monthly_orders[int(row.month) - 1] = row.count
+
+    # Top 5 flavors
+    top_flavors = db.session.query(
+        Booking.flavor,
+        func.count(Booking.booking_id).label('count')
+    ).group_by(Booking.flavor)\
+     .order_by(func.count(Booking.booking_id).desc())\
+     .limit(5).all()
+    top_flavors = [{'flavor': r.flavor, 'count': r.count} for r in top_flavors]
+
+    counts = {
+        'all':       total_bookings,
+        'pending':   pending_count,
+        'accepted':  accepted_count,
+        'declined':  declined_count,
+        'cancelled': cancelled_count,
+    }
+
+    return render_template(
+        'staff/dashboard.html',
+        title='Staff Dashboard',
+        counts=counts,
+        total_revenue=float(total_revenue),
+        this_month_orders=this_month_orders,
+        this_month_revenue=float(this_month_revenue),
+        monthly_orders=monthly_orders,
+        top_flavors=top_flavors,
+    )
+
+# Bookings list
 @staff_bp.route('/staff/bookings')
 @staff_required
 def bookings():
+    from sqlalchemy import func, extract
+    from datetime import date
+
+    today = date.today()
     status_filter = request.args.get('status', 'all')
+
     query = Booking.query.order_by(Booking.created_at.desc())
     if status_filter != 'all':
         query = query.filter_by(booking_status=status_filter.capitalize())
     all_bookings = query.all()
+
     users = {u.user_id: u for u in User.query.all()}
+
     progress_map = {}
     for cp in CakeProgress.query.order_by(CakeProgress.updated_at.desc()).all():
         if cp.booking_id not in progress_map:
             progress_map[cp.booking_id] = cp.cake_status
+
     counts = {
         'all':       Booking.query.count(),
         'pending':   Booking.query.filter_by(booking_status='Pending').count(),
@@ -46,12 +126,63 @@ def bookings():
         'declined':  Booking.query.filter_by(booking_status='Declined').count(),
         'cancelled': Booking.query.filter_by(booking_status='Cancelled').count(),
     }
-    perm = StaffPermission.query.filter_by(user_id=current_user.user_id).first()
-    return render_template('staff/bookings.html',
-                           bookings=all_bookings, users=users,
-                           progress_map=progress_map,
-                           counts=counts, active=status_filter, perm=perm)
 
+    # ── Dashboard stats ──
+    total_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).filter_by(booking_status='Accepted').scalar()
+
+    this_month_orders = Booking.query.filter(
+        extract('year',  Booking.created_at) == today.year,
+        extract('month', Booking.created_at) == today.month
+    ).count()
+
+    this_month_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).filter(
+        Booking.booking_status == 'Accepted',
+        extract('year',  Booking.pickup_date) == today.year,
+        extract('month', Booking.pickup_date) == today.month
+    ).scalar()
+
+    # Monthly orders this year (for chart)
+    monthly_data = db.session.query(
+        extract('month', Booking.pickup_date).label('month'),
+        func.count(Booking.booking_id).label('count')
+    ).filter(
+        extract('year', Booking.pickup_date) == today.year
+    ).group_by('month').all()
+
+    monthly_orders = [0] * 12
+    for row in monthly_data:
+        monthly_orders[int(row.month) - 1] = row.count
+
+    # Top 5 flavors
+    top_flavors = db.session.query(
+        Booking.flavor,
+        func.count(Booking.booking_id).label('count')
+    ).group_by(Booking.flavor)\
+     .order_by(func.count(Booking.booking_id).desc())\
+     .limit(5).all()
+    top_flavors = [{'flavor': r.flavor, 'count': r.count} for r in top_flavors]
+
+    perm = StaffPermission.query.filter_by(user_id=current_user.user_id).first()
+
+    return render_template(
+        'staff/bookings.html',
+        bookings=all_bookings,
+        users=users,
+        progress_map=progress_map,
+        counts=counts,
+        active=status_filter,
+        perm=perm,
+        # dashboard stats
+        total_revenue=float(total_revenue),
+        this_month_orders=this_month_orders,
+        this_month_revenue=float(this_month_revenue),
+        monthly_orders=monthly_orders,
+        top_flavors=top_flavors,
+    )
 # Accept or decline a booking (requires can_approve_orders permission)
 @staff_bp.route('/staff/bookings/<int:booking_id>/respond', methods=['POST'])
 @staff_required

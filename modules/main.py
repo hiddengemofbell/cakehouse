@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user
 from modules.decorators import customer_required
 from modules.models import Booking
@@ -14,6 +14,19 @@ def landing():
 @main_bp.route('/about_us')
 def AboutUs():
     return render_template('customer/about_us.html')
+
+# Dashboard redirect based on user role
+@main_bp.route('/dashboard')
+def dashboard():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
+    if current_user.role == 'admin':
+        return redirect(url_for('admin.dashboard'))
+    elif current_user.role == 'staff':
+        return redirect(url_for('staff.bookings'))
+    else:
+        return redirect(url_for('main.home'))
 
 # Logged-in customers only
 @main_bp.route('/home')
