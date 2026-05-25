@@ -4,7 +4,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 from modules import db
-from modules.models import User, Booking, CakeProgress, Cake, StaffPermission, Category
+from modules.models import User, Booking, Cake, StaffPermission, Category
 from modules.decorators import staff_required
 
 cloudinary.config(
@@ -114,10 +114,8 @@ def bookings():
 
     users = {u.user_id: u for u in User.query.all()}
 
-    progress_map = {}
-    for cp in CakeProgress.query.order_by(CakeProgress.updated_at.desc()).all():
-        if cp.booking_id not in progress_map:
-            progress_map[cp.booking_id] = cp.cake_status
+    # Progress is now a direct column on Booking
+    progress_map = {b.booking_id: b.cake_status or 'not_started' for b in all_bookings}
 
     counts = {
         'all':       Booking.query.count(),
@@ -240,12 +238,8 @@ def update_progress(booking_id):
     booking = Booking.query.get_or_404(booking_id)
     cake_status = request.form.get('cake_status')
     if cake_status in ['not_started', 'ongoing', 'completed']:
-        progress = CakeProgress(
-            booking_id=booking_id,
-            cake_status=cake_status,
-            updated_by=current_user.user_id
-        )
-        db.session.add(progress)
+        booking.cake_status         = cake_status
+        booking.progress_updated_by = current_user.user_id
         db.session.commit()
         flash('Progress updated.', 'success')
     return redirect(url_for('staff.bookings', status='accepted'))
@@ -270,14 +264,17 @@ def upload_cake():
         result = cloudinary.uploader.upload(file, folder='lizas-cakehouse')
         image_url = result['secure_url']
 
-    category = request.form.get('category', '').strip()
-    if category and not Category.query.filter_by(name=category).first():
-        db.session.add(Category(name=category))
+    category_name = request.form.get('category', '').strip()
+    cat = Category.query.filter_by(name=category_name).first()
+    if not cat:
+        cat = Category(name=category_name)
+        db.session.add(cat)
+        db.session.flush()
 
     new_cake = Cake(
         design_name=request.form.get('design_name'),
         description=request.form.get('description'),
-        category=category,
+        category_id=cat.category_id,
         base_price=0,
         image_url=image_url,
         is_approved=False   # needs admin approval before showing to customers
@@ -298,9 +295,17 @@ def edit_cake(cake_id):
     data = request.get_json() if request.is_json else request.form
     cake.design_name = data.get('design_name', cake.design_name)
     cake.description = data.get('description', cake.description)
-    cake.category = data.get('category', cake.category)
-    cake.base_price = data.get('base_price', cake.base_price)
-    cake.image_url = data.get('image_url', cake.image_url)
+    cake.base_price  = data.get('base_price', cake.base_price)
+    cake.image_url   = data.get('image_url', cake.image_url)
+
+    category_name = data.get('category', '').strip()
+    if category_name:
+        cat = Category.query.filter_by(name=category_name).first()
+        if not cat:
+            cat = Category(name=category_name)
+            db.session.add(cat)
+            db.session.flush()
+        cake.category_id = cat.category_id
     db.session.commit()
     return jsonify({'message': 'Cake design updated!'})
 

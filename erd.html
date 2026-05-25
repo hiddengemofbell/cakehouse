@@ -13,13 +13,13 @@ body {
   flex-direction: column;
   align-items: center;
 }
-h1 { font-size:1.5rem; color:#c0436a; margin-bottom:4px; }
-.sub { color:#bbb; font-size:0.82rem; margin-bottom:36px; }
+h1  { font-size:1.5rem; color:#c0436a; margin-bottom:4px; }
+.sub{ color:#bbb; font-size:0.82rem; margin-bottom:36px; }
 
 .erd-canvas {
   position: relative;
-  width: 1060px;
-  height: 820px;
+  width: 1140px;
+  height: 940px;
 }
 
 svg.lines {
@@ -30,21 +30,20 @@ svg.lines {
   pointer-events: none;
   overflow: visible;
 }
-svg.lines line, svg.lines path {
+svg.lines path {
   stroke: #d4789a;
   stroke-width: 1.8;
   fill: none;
   stroke-dasharray: 5 3;
 }
 
-/* ── Table card ── */
 .tbl {
   position: absolute;
   background: #fff;
   border-radius: 14px;
   border: 1.5px solid #f0dce5;
   box-shadow: 0 3px 18px #c0436a0d;
-  min-width: 190px;
+  min-width: 210px;
   overflow: hidden;
 }
 .tbl-head {
@@ -64,10 +63,9 @@ svg.lines line, svg.lines path {
   padding: 4px 14px;
   font-size: 0.78rem;
   color: #444;
-  line-height: 1.4;
 }
-.tbl-row .col-name { font-weight: 500; }
-.tbl-row .col-type { color: #bbb; font-size: 0.72rem; }
+.col-name { font-weight: 500; }
+.col-type { color:#bbb; font-size:0.72rem; }
 .badge {
   font-size: 0.6rem;
   font-weight: 700;
@@ -78,15 +76,14 @@ svg.lines line, svg.lines path {
 }
 .pk { background:#fce8f0; color:#c0436a; }
 .fk { background:#e8f0fc; color:#436ac0; }
-.divider { height:1px; background:#f5e8ed; margin: 4px 0; }
+.divider { height:1px; background:#f5e8ed; margin:4px 0; }
 
-/* ── Relationship label ── */
 .rel-label {
   position: absolute;
   font-size: 0.65rem;
   color: #c0436a;
   background: #fdf6f9;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 4px;
   pointer-events: none;
   white-space: nowrap;
@@ -100,52 +97,28 @@ svg.lines line, svg.lines path {
 
 <div class="erd-canvas" id="canvas">
 
-  <!-- ═══ TABLES ═══ -->
+  <!-- ═══ LEFT COLUMN — Cake-related ═══ -->
 
-  <!-- USER — center top -->
-  <div class="tbl" id="tbl-user" style="left:400px; top:20px;">
-    <div class="tbl-head">User</div>
+  <!-- CATEGORY top-left -->
+  <div class="tbl" id="tbl-category" style="left:20px; top:20px;">
+    <div class="tbl-head">Category</div>
     <div class="tbl-body">
-      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">user_id</span><span class="col-type">int</span></div>
+      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">category_id</span><span class="col-type">int</span></div>
       <div class="divider"></div>
       <div class="tbl-row"><span class="col-name">name</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">email</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">password_hash</span><span class="col-type">text</span></div>
-      <div class="tbl-row"><span class="col-name">role</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">google_id</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">created_at</span><span class="col-type">datetime</span></div>
     </div>
   </div>
 
-  <!-- BOOKING — center -->
-  <div class="tbl" id="tbl-booking" style="left:390px; top:280px;">
-    <div class="tbl-head">Booking</div>
-    <div class="tbl-body">
-      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">booking_id</span><span class="col-type">int</span></div>
-      <div class="divider"></div>
-      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">user_id</span><span class="col-type">int</span></div>
-      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">cake_id</span><span class="col-type">int</span></div>
-      <div class="divider"></div>
-      <div class="tbl-row"><span class="col-name">flavor</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">size</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">design_notes</span><span class="col-type">text</span></div>
-      <div class="tbl-row"><span class="col-name">special_notes</span><span class="col-type">text</span></div>
-      <div class="tbl-row"><span class="col-name">pickup_date</span><span class="col-type">date</span></div>
-      <div class="tbl-row"><span class="col-name">total_price</span><span class="col-type">decimal</span></div>
-      <div class="tbl-row"><span class="col-name">booking_status</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">decline_reason</span><span class="col-type">text</span></div>
-      <div class="tbl-row"><span class="col-name">created_at</span><span class="col-type">datetime</span></div>
-    </div>
-  </div>
-
-  <!-- CAKE — left -->
-  <div class="tbl" id="tbl-cake" style="left:60px; top:280px;">
+  <!-- CAKE below category -->
+  <div class="tbl" id="tbl-cake" style="left:20px; top:130px;">
     <div class="tbl-head">Cake</div>
     <div class="tbl-body">
       <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">cake_id</span><span class="col-type">int</span></div>
       <div class="divider"></div>
+      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">category_id</span><span class="col-type">int</span></div>
+      <div class="divider"></div>
       <div class="tbl-row"><span class="col-name">design_name</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">category</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">description</span><span class="col-type">text</span></div>
       <div class="tbl-row"><span class="col-name">base_price</span><span class="col-type">decimal</span></div>
       <div class="tbl-row"><span class="col-name">image_url</span><span class="col-type">text</span></div>
       <div class="tbl-row"><span class="col-name">is_visible</span><span class="col-type">bool</span></div>
@@ -154,8 +127,8 @@ svg.lines line, svg.lines path {
     </div>
   </div>
 
-  <!-- CAKE_REACTION — far left -->
-  <div class="tbl" id="tbl-reaction" style="left:60px; top:560px;">
+  <!-- CAKE REACTION below cake, left -->
+  <div class="tbl" id="tbl-reaction" style="left:20px; top:700px;">
     <div class="tbl-head">Cake Reaction</div>
     <div class="tbl-body">
       <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">reaction_id</span><span class="col-type">int</span></div>
@@ -168,8 +141,56 @@ svg.lines line, svg.lines path {
     </div>
   </div>
 
-  <!-- STAFF_PERMISSION — far right top -->
-  <div class="tbl" id="tbl-perm" style="left:760px; top:20px;">
+  <!-- ═══ CENTER COLUMN — User / Booking ═══ -->
+
+  <!-- USER top-center -->
+  <div class="tbl" id="tbl-user" style="left:420px; top:20px;">
+    <div class="tbl-head">User</div>
+    <div class="tbl-body">
+      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">user_id</span><span class="col-type">int</span></div>
+      <div class="divider"></div>
+      <div class="tbl-row"><span class="col-name">name</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">email</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">password_hash</span><span class="col-type">text</span></div>
+      <div class="tbl-row"><span class="col-name">role</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">created_at</span><span class="col-type">datetime</span></div>
+    </div>
+  </div>
+
+  <!-- BOOKING center -->
+  <div class="tbl" id="tbl-booking" style="left:420px; top:240px;">
+    <div class="tbl-head">Booking</div>
+    <div class="tbl-body">
+      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">booking_id</span><span class="col-type">int</span></div>
+      <div class="divider"></div>
+      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">user_id</span><span class="col-type">int</span></div>
+      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">cake_id</span><span class="col-type">int</span></div>
+      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">progress_updated_by</span><span class="col-type">int → user</span></div>
+      <div class="divider"></div>
+      <div class="tbl-row"><span class="col-name">pickup_date</span><span class="col-type">date</span></div>
+      <div class="tbl-row"><span class="col-name">pickup_time</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">budget</span><span class="col-type">decimal</span></div>
+      <div class="tbl-row"><span class="col-name">pay_method</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">total_price</span><span class="col-type">decimal</span></div>
+      <div class="tbl-row"><span class="col-name">downpayment_proof</span><span class="col-type">text</span></div>
+      <div class="divider"></div>
+      <div class="tbl-row"><span class="col-name">booking_status</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">decline_reason</span><span class="col-type">text</span></div>
+      <div class="tbl-row"><span class="col-name">cake_status</span><span class="col-type">varchar</span></div>
+      <div class="divider"></div>
+      <div class="tbl-row"><span class="col-name">rating</span><span class="col-type">int</span></div>
+      <div class="tbl-row"><span class="col-name">comment</span><span class="col-type">text</span></div>
+      <div class="tbl-row"><span class="col-name">feedback_at</span><span class="col-type">datetime</span></div>
+      <div class="divider"></div>
+      <div class="tbl-row"><span class="col-name">created_at</span><span class="col-type">datetime</span></div>
+      <div class="tbl-row"><span class="col-name">updated_at</span><span class="col-type">datetime</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT COLUMN — Staff / Spec ═══ -->
+
+  <!-- STAFF PERMISSION top-right -->
+  <div class="tbl" id="tbl-perm" style="left:860px; top:20px;">
     <div class="tbl-head">Staff Permission</div>
     <div class="tbl-body">
       <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">permission_id</span><span class="col-type">int</span></div>
@@ -183,116 +204,120 @@ svg.lines line, svg.lines path {
     </div>
   </div>
 
-  <!-- CAKE_PROGRESS — right -->
-  <div class="tbl" id="tbl-progress" style="left:760px; top:280px;">
-    <div class="tbl-head">Cake Progress</div>
+  <!-- BOOKING SPEC right-center -->
+  <div class="tbl" id="tbl-spec" style="left:860px; top:270px;">
+    <div class="tbl-head">Booking Spec</div>
     <div class="tbl-body">
-      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">progress_id</span><span class="col-type">int</span></div>
+      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">spec_id</span><span class="col-type">int</span></div>
       <div class="divider"></div>
       <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">booking_id</span><span class="col-type">int</span></div>
-      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">updated_by</span><span class="col-type">int → user</span></div>
       <div class="divider"></div>
-      <div class="tbl-row"><span class="col-name">cake_status</span><span class="col-type">varchar</span></div>
-      <div class="tbl-row"><span class="col-name">updated_at</span><span class="col-type">datetime</span></div>
+      <div class="tbl-row"><span class="col-name">flavor</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">size</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">quantity</span><span class="col-type">int</span></div>
+      <div class="tbl-row"><span class="col-name">theme</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">layers</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">motif_color</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">cake_message</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">notes</span><span class="col-type">text</span></div>
+      <div class="tbl-row"><span class="col-name">phone</span><span class="col-type">varchar</span></div>
+      <div class="tbl-row"><span class="col-name">social</span><span class="col-type">varchar</span></div>
     </div>
   </div>
 
-  <!-- FEEDBACK — right bottom -->
-  <div class="tbl" id="tbl-feedback" style="left:760px; top:560px;">
-    <div class="tbl-head">Feedback</div>
-    <div class="tbl-body">
-      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">feedback_id</span><span class="col-type">int</span></div>
-      <div class="divider"></div>
-      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">booking_id</span><span class="col-type">int</span></div>
-      <div class="tbl-row"><span class="badge fk">FK</span><span class="col-name">user_id</span><span class="col-type">int</span></div>
-      <div class="divider"></div>
-      <div class="tbl-row"><span class="col-name">rating</span><span class="col-type">int</span></div>
-      <div class="tbl-row"><span class="col-name">comment</span><span class="col-type">text</span></div>
-      <div class="tbl-row"><span class="col-name">created_at</span><span class="col-type">datetime</span></div>
-    </div>
-  </div>
-
-  <!-- CATEGORY — bottom center -->
-  <div class="tbl" id="tbl-category" style="left:390px; top:700px;">
-    <div class="tbl-head">Category</div>
-    <div class="tbl-body">
-      <div class="tbl-row"><span class="badge pk">PK</span><span class="col-name">category_id</span><span class="col-type">int</span></div>
-      <div class="divider"></div>
-      <div class="tbl-row"><span class="col-name">name</span><span class="col-type">varchar</span></div>
-    </div>
-  </div>
-
-  <!-- ═══ SVG LINES ═══ -->
   <svg class="lines" id="lines"></svg>
 
 </div>
 
 <script>
-// Draw a clean elbow (right-angle) connector between two elements
-function connect(fromId, fromSide, toId, toSide, label) {
+function getAnchor(el, side) {
+  const l = el.offsetLeft, t = el.offsetTop;
+  const w = el.offsetWidth,  h = el.offsetHeight;
+  if (side === 'top')    return [l + w / 2, t];
+  if (side === 'bottom') return [l + w / 2, t + h];
+  if (side === 'left')   return [l,         t + h / 2];
+  if (side === 'right')  return [l + w,     t + h / 2];
+}
+
+function connect(fromId, fromSide, toId, toSide, label, customD) {
   const canvas = document.getElementById('canvas');
   const svg    = document.getElementById('lines');
   const from   = document.getElementById(fromId);
   const to     = document.getElementById(toId);
 
-  function mid(el, side) {
-    const l = el.offsetLeft, t = el.offsetTop;
-    const w = el.offsetWidth, h = el.offsetHeight;
-    if (side === 'top')    return [l + w/2, t];
-    if (side === 'bottom') return [l + w/2, t + h];
-    if (side === 'left')   return [l,       t + h/2];
-    if (side === 'right')  return [l + w,   t + h/2];
+  const [x1, y1] = getAnchor(from, fromSide);
+  const [x2, y2] = getAnchor(to,   toSide);
+
+  let d = customD;
+  if (!d) {
+    if (fromSide === 'left' || fromSide === 'right' || toSide === 'left' || toSide === 'right') {
+      const mx = (x1 + x2) / 2;
+      d = `M${x1},${y1} L${mx},${y1} L${mx},${y2} L${x2},${y2}`;
+    } else {
+      const my = (y1 + y2) / 2;
+      d = `M${x1},${y1} L${x1},${my} L${x2},${my} L${x2},${y2}`;
+    }
   }
 
-  const [x1, y1] = mid(from, fromSide);
-  const [x2, y2] = mid(to,   toSide);
-
-  let d;
-  // Horizontal connection (left/right)
-  if (fromSide === 'right' || fromSide === 'left' || toSide === 'right' || toSide === 'left') {
-    const mx = (x1 + x2) / 2;
-    d = `M${x1},${y1} L${mx},${y1} L${mx},${y2} L${x2},${y2}`;
-  } else {
-    // Vertical connection (top/bottom)
-    const my = (y1 + y2) / 2;
-    d = `M${x1},${y1} L${x1},${my} L${x2},${my} L${x2},${y2}`;
-  }
-
-  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', d);
   svg.appendChild(path);
 
   if (label) {
-    const mx = (x1 + x2) / 2;
-    const my = (y1 + y2) / 2;
+    const lx = (x1 + x2) / 2;
+    const ly = (y1 + y2) / 2;
     const span = document.createElement('span');
     span.className = 'rel-label';
     span.textContent = label;
-    span.style.left = (mx - 20) + 'px';
-    span.style.top  = (my - 10) + 'px';
+    span.style.left = (lx - 18) + 'px';
+    span.style.top  = (ly - 10) + 'px';
     canvas.appendChild(span);
   }
 }
 
 window.onload = () => {
-  // USER → BOOKING
-  connect('tbl-user',     'bottom', 'tbl-booking',  'top',    '1 : N');
-  // USER → STAFF_PERMISSION
-  connect('tbl-user',     'right',  'tbl-perm',     'left',   '1 : 1');
-  // USER → CAKE_REACTION
-  connect('tbl-user',     'left',   'tbl-reaction', 'top',    '1 : N');
-  // USER → FEEDBACK
-  connect('tbl-user',     'right',  'tbl-feedback', 'top',    '1 : N');
-  // USER → CAKE_PROGRESS
-  connect('tbl-user',     'right',  'tbl-progress', 'top',    '1 : N');
-  // BOOKING → CAKE
-  connect('tbl-booking',  'left',   'tbl-cake',     'right',  'N : 1');
-  // BOOKING → CAKE_PROGRESS
-  connect('tbl-booking',  'right',  'tbl-progress', 'left',   '1 : N');
-  // BOOKING → FEEDBACK
-  connect('tbl-booking',  'right',  'tbl-feedback', 'left',   '1 : N');
-  // CAKE → CAKE_REACTION
-  connect('tbl-cake',     'bottom', 'tbl-reaction', 'top',    '1 : N');
+  // ── Clean vertical connections ──
+  // Category → Cake (directly above/below, same column)
+  connect('tbl-category', 'bottom', 'tbl-cake', 'top', '1 : N');
+
+  // User → Booking (directly above/below, same column)
+  connect('tbl-user', 'bottom', 'tbl-booking', 'top', '1 : N');
+
+  // ── Clean horizontal connections ──
+  // User → StaffPermission (same row, right to left)
+  connect('tbl-user', 'right', 'tbl-perm', 'left', '1 : 1');
+
+  // Booking → BookingSpec (same row, right to left)
+  connect('tbl-booking', 'right', 'tbl-spec', 'left', '1 : 1');
+
+  // ── Elbow connections through the gap (x ≈ 310) between Cake and Booking ──
+  // Booking → Cake (left of Booking to right of Cake, elbow through gap)
+  connect('tbl-booking', 'left', 'tbl-cake', 'right', 'N : 1');
+
+  // Cake → CakeReaction (bottom of Cake to top of CakeReaction, same left column)
+  connect('tbl-cake', 'bottom', 'tbl-reaction', 'top', '1 : N');
+
+  // User → CakeReaction — routed through the gap between Cake and Booking
+  // Manual path: User left → go left to x=320 → down to CakeReaction right-mid → connect
+  const user     = document.getElementById('tbl-user');
+  const reaction = document.getElementById('tbl-reaction');
+  const ux  = user.offsetLeft;
+  const uy  = user.offsetTop + user.offsetHeight / 2;
+  const rx  = reaction.offsetLeft + reaction.offsetWidth;
+  const ry  = reaction.offsetTop  + reaction.offsetHeight / 2;
+  const gx  = 320; // x in the gap between Cake (right≈240) and Booking (left=420)
+  const d   = `M${ux},${uy} L${gx},${uy} L${gx},${ry} L${rx},${ry}`;
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  document.getElementById('lines').appendChild(path);
+
+  // Label for User → CakeReaction
+  const lspan = document.createElement('span');
+  lspan.className = 'rel-label';
+  lspan.textContent = '1 : N';
+  lspan.style.left = (gx - 18) + 'px';
+  lspan.style.top  = ((uy + ry) / 2 - 10) + 'px';
+  document.getElementById('canvas').appendChild(lspan);
 };
 </script>
 </body>

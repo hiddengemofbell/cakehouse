@@ -44,7 +44,7 @@
     </h2>
     <div class="gallery-grid">
       {% for cake in pending %}
-      <figure class="gallery-item pending-item" data-category="{{ cake.category }}">
+      <figure class="gallery-item pending-item" data-category="{{ cake.category.name.name }}">
         {% if cake.image_url %}
           <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
         {% else %}
@@ -53,7 +53,7 @@
           </div>
         {% endif %}
         <div class="overlay">
-          <span class="overlay-tag">{{ cake.category }}</span>
+          <span class="overlay-tag">{{ cake.category.name }}</span>
           <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
           <p class="overlay-uploader">Liza's Cakehouse</p>
         </div>
@@ -79,7 +79,7 @@
   <!-- Approved Gallery Grid -->
   <div class="gallery-grid">
     {% for cake in cakes %}
-    <figure class="gallery-item" data-category="{{ cake.category }}">
+    <figure class="gallery-item" data-category="{{ cake.category.name.name }}">
       {% if cake.image_url %}
         <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
       {% else %}
@@ -88,7 +88,7 @@
         </div>
       {% endif %}
       <div class="overlay">
-        <span class="overlay-tag">{{ cake.category }}</span>
+        <span class="overlay-tag">{{ cake.category.name }}</span>
         <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
         <p class="overlay-uploader">Liza's Cakehouse</p>
       </div>

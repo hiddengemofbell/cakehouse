@@ -24,6 +24,7 @@
 
   <form class="booking-form"
         method="POST"
+        enctype="multipart/form-data"
         action="{{ url_for('bookings.place_booking') }}">
 
     <!-- ── Personal Information ── -->
@@ -283,7 +284,57 @@
       </div>
     </div>
 
-    <button type="submit" class="cta-btn1 bk-submit">Done</button>
+    <!-- ── Downpayment ── -->
+    <div class="booking-card">
+      <h2 class="booking-section-title">Downpayment</h2>
+      <p class="bk-sublabel" style="margin-bottom:16px;">To confirm your slot, please send a <strong>reservation fee</strong> to any of the following before submitting:</p>
+
+      <div class="dp-methods">
+        <div class="dp-method">
+          <span class="dp-method-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            GCash
+          </span>
+          <span class="dp-method-value">0917-123-4567 &mdash; <em>Liza G.</em></span>
+        </div>
+        <div class="dp-method">
+          <span class="dp-method-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Bank Transfer
+          </span>
+          <span class="dp-method-value">BDO &mdash; 1234-5678-90 &mdash; <em>Liza G.</em></span>
+        </div>
+      </div>
+
+      <div class="dp-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Please include your name as the payment reference.
+      </div>
+
+      <div class="bk-field" style="margin-top:20px;">
+        <label class="bk-label" for="downpayment_proof">
+          Upload Payment Screenshot <span style="color:#e05555;">*</span>
+        </label>
+        <label class="dp-upload-area {% if field_errors.downpayment_proof %}dp-upload-error{% endif %}" id="dpUploadArea" for="downpayment_proof">
+          <input type="file" id="downpayment_proof" name="downpayment_proof"
+                 accept="image/*" style="display:none;" required>
+          <div class="dp-upload-idle" id="dpIdle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Click to upload screenshot</span>
+            <small>PNG, JPG, JPEG up to 10MB</small>
+          </div>
+          <div class="dp-upload-preview" id="dpPreview" style="display:none;">
+            <img id="dpPreviewImg" src="" alt="Payment proof preview">
+            <span id="dpFileName"></span>
+          </div>
+        </label>
+        {% if field_errors.downpayment_proof %}
+          <span class="bk-field-error">{{ field_errors.downpayment_proof }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <button type="submit" class="cta-btn1 bk-submit">Submit Booking</button>
 
   </form>
 </section>
@@ -512,5 +563,22 @@
     if (!tp.contains(e.target) && e.target !== tpDisplay) tp.hidden = true;
   });
 })();
+
+/* ── Downpayment upload preview ── */
+const dpInput   = document.getElementById('downpayment_proof');
+const dpIdle    = document.getElementById('dpIdle');
+const dpPreview = document.getElementById('dpPreview');
+const dpImg     = document.getElementById('dpPreviewImg');
+const dpName    = document.getElementById('dpFileName');
+
+dpInput.addEventListener('change', () => {
+  const file = dpInput.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  dpImg.src = url;
+  dpName.textContent = file.name;
+  dpIdle.style.display    = 'none';
+  dpPreview.style.display = 'flex';
+});
 </script>
 {% endblock %}

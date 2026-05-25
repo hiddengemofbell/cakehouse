@@ -42,6 +42,7 @@
   <div class="bkmgmt-list">
     {% for b in bookings %}
     {% set customer = users.get(b.user_id) %}
+    {% set s = b.spec %}
 
     <div class="bkmgmt-card">
 
@@ -61,7 +62,7 @@
       <div class="bkmgmt-details">
         <div class="bkmgmt-detail">
           <span class="bkmgmt-detail-label">Type of Cake</span>
-          <span class="bkmgmt-detail-value">{{ b.flavor }}</span>
+          <span class="bkmgmt-detail-value">{{ s.flavor if s else '—' }}</span>
         </div>
         <div class="bkmgmt-detail">
           <span class="bkmgmt-detail-label">Pickup Date</span>
@@ -69,7 +70,7 @@
         </div>
         <div class="bkmgmt-detail">
           <span class="bkmgmt-detail-label">Size</span>
-          <span class="bkmgmt-detail-value">{{ b.size or '—' }}</span>
+          <span class="bkmgmt-detail-value">{{ s.size if s else '—' }}</span>
         </div>
         <div class="bkmgmt-detail">
           <span class="bkmgmt-detail-label">Price</span>
@@ -79,12 +80,12 @@
         </div>
       </div>
 
-      <!-- Design notes -->
-      {% if b.design_notes %}
-      <p class="bkmgmt-notes">{{ b.design_notes }}</p>
-      {% endif %}
-      {% if b.special_notes %}
-      <p class="bkmgmt-notes muted">{{ b.special_notes }}</p>
+      <!-- Order details -->
+      {% if s %}
+      {% if s.theme %}<p class="bkmgmt-notes">🎨 Theme: {{ s.theme }}{% if s.motif_color %} &bull; {{ s.motif_color }}{% endif %}{% if s.layers %} &bull; {{ s.layers }} layer(s){% endif %}</p>{% endif %}
+      {% if s.cake_message %}<p class="bkmgmt-notes">💬 "{{ s.cake_message }}"</p>{% endif %}
+      {% if s.phone %}<p class="bkmgmt-notes muted">📞 {{ s.phone }}{% if b.pickup_time %} &bull; 🕐 {{ b.pickup_time }}{% endif %}</p>{% endif %}
+      {% if s.notes %}<p class="bkmgmt-notes muted">📝 {{ s.notes }}</p>{% endif %}
       {% endif %}
       {% if b.booking_status == 'Declined' and b.decline_reason %}
       <p class="bkmgmt-decline-reason">⚠ Reason: {{ b.decline_reason }}</p>
@@ -103,9 +104,9 @@
           <button type="button" class="bkmgmt-btn decline-btn"
                   data-action="{{ url_for('staff.respond_booking', booking_id=b.booking_id) }}?status={{ active }}"
                   data-customer="{{ customer.name if customer else 'Unknown' }}"
-                  data-cake="{{ b.flavor }}"
+                  data-cake="{{ s.flavor if s else '—' }}"
                   data-date="{{ b.pickup_date.strftime('%b %d, %Y') }}"
-                  data-size="{{ b.size or '—' }}">
+                  data-size="{{ s.size if s else '—' }}">
             ✕ Decline
           </button>
         {% endif %}

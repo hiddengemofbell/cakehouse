@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from modules import db
-from modules.models import Booking, CakeProgress, Feedback
+from modules.models import Booking, BookingSpec
 from modules.validators import BookingSchema, validate
+import cloudinary
+import cloudinary.uploader
 
 bookings_bp = Blueprint('bookings', __name__)
 
@@ -58,33 +60,49 @@ def place_booking():
             except ValueError:
                 field_errors['pickup_date'] = 'Invalid date selected.'
 
+        # ── Downpayment proof upload ──
+        proof_file = request.files.get('downpayment_proof')
+        if not proof_file or not proof_file.filename:
+            field_errors['downpayment_proof'] = 'Please upload your downpayment screenshot.'
+
         # ── If any errors, re-render form with data intact ──
         if field_errors:
             return render_template('customer/booking_form.html',
                                    fd=fd, field_errors=field_errors)
 
-        # ── All good — save booking ──
-        design_notes = f"Theme: {theme} | Size: {size} | Layers: {layers} | Motif/Color: {motif}"
-        special_notes_parts = []
-        if phone:        special_notes_parts.append(f"Phone: {phone}")
-        if social:       special_notes_parts.append(f"Social: {social}")
-        if cake_msg:     special_notes_parts.append(f"Cake message: {cake_msg}")
-        if pickup_time:  special_notes_parts.append(f"Pickup time: {pickup_time}")
-        if extra_notes:  special_notes_parts.append(f"Notes: {extra_notes}")
-        special_notes = " | ".join(special_notes_parts)
+        # Upload proof to Cloudinary
+        upload_result = cloudinary.uploader.upload(
+            proof_file,
+            folder='lizas-cakehouse/downpayments'
+        )
+        proof_url = upload_result['secure_url']
 
+        # ── All good — save booking + spec ──
         new_booking = Booking(
-            user_id=current_user.user_id,
-            flavor=fd.get('flavor', 'Custom'),
-            size=size,
-            design_notes=design_notes,
-            special_notes=special_notes or None,
-            quantity=int(fd.get('quantity', 1) or 1),
-            pickup_date=pickup_date,
-            budget=fd.get('budget', 0),
-            pay_method=fd.get('pay_method', 'TBD')
+            user_id           = current_user.user_id,
+            pickup_date       = pickup_date,
+            pickup_time       = pickup_time or None,
+            budget            = fd.get('budget', 0),
+            pay_method        = fd.get('pay_method', 'TBD'),
+            downpayment_proof = proof_url,
         )
         db.session.add(new_booking)
+        db.session.flush()  # get booking_id before commit
+
+        new_spec = BookingSpec(
+            booking_id   = new_booking.booking_id,
+            flavor       = fd.get('flavor', 'Custom'),
+            size         = size,
+            quantity     = int(fd.get('quantity', 1) or 1),
+            theme        = theme or None,
+            layers       = layers or None,
+            motif_color  = motif or None,
+            cake_message = cake_msg or None,
+            notes        = extra_notes or None,
+            phone        = phone or None,
+            social       = social or None,
+        )
+        db.session.add(new_spec)
         db.session.commit()
         flash('Your booking has been submitted! We\'ll get back to you soon.', 'success')
         return redirect(url_for('bookings.place_booking'))
@@ -97,24 +115,28 @@ def bookings():
     user_bookings = Booking.query.filter_by(user_id=current_user.user_id).all()
     result = []
     for b in user_bookings:
+        s = b.spec  # BookingSpec (may be None for very old records)
         booking_data = {
-            'booking_id': b.booking_id,
-            'cake_id': b.cake_id,
-            'design_notes': b.design_notes,
-            'quantity': b.quantity,
-            'size': b.size,
-            'flavor': b.flavor,
-            'special_notes': b.special_notes,
-            'pickup_date': b.pickup_date.isoformat(),
-            'budget': str(b.budget),
-            'total_price': str(b.total_price) if b.total_price is not None else None,
-            'pay_method': b.pay_method
+            'booking_id':   b.booking_id,
+            'cake_id':      b.cake_id,
+            'flavor':       s.flavor       if s else None,
+            'size':         s.size         if s else None,
+            'theme':        s.theme        if s else None,
+            'layers':       s.layers       if s else None,
+            'motif_color':  s.motif_color  if s else None,
+            'cake_message': s.cake_message if s else None,
+            'notes':        s.notes        if s else None,
+            'phone':        s.phone        if s else None,
+            'quantity':     s.quantity     if s else None,
+            'pickup_date':  b.pickup_date.isoformat(),
+            'pickup_time':  b.pickup_time,
+            'budget':       str(b.budget),
+            'total_price':  str(b.total_price) if b.total_price is not None else None,
+            'pay_method':   b.pay_method,
         }
 
         if b.booking_status == 'Accepted':
-            # Show cake status instead of booking status
-            progress = CakeProgress.query.filter_by(booking_id=b.booking_id).order_by(CakeProgress.updated_at.desc()).first()
-            booking_data['status'] = progress.cake_status if progress else 'not_started'
+            booking_data['status'] = b.cake_status or 'not_started'
         else:
             booking_data['status'] = b.booking_status
 
@@ -125,13 +147,11 @@ def bookings():
 @bookings_bp.route('/bookings/<int:booking_id>/progress')
 @login_required
 def booking_progress(booking_id):
-    progress = CakeProgress.query.filter_by(booking_id=booking_id).order_by(CakeProgress.updated_at.desc()).first()
-    if not progress:
-        return jsonify({'message': 'No progress found for this booking'}), 404
+    booking = Booking.query.get_or_404(booking_id)
     return jsonify({
-        'cake_status': progress.cake_status,
-        'updated_by': progress.updated_by,
-        'updated_at': progress.updated_at.isoformat()
+        'cake_status': booking.cake_status or 'not_started',
+        'updated_by':  booking.progress_updated_by,
+        'updated_at':  booking.updated_at.isoformat() if booking.updated_at else None
     })
 
 @bookings_bp.route('/bookings/<int:booking_id>')
@@ -161,15 +181,21 @@ def cancel_booking(booking_id):
 @bookings_bp.route('/bookings/<int:booking_id>/feedback', methods=['POST'])
 @login_required
 def submit_feedback(booking_id):
+    from datetime import datetime
     data = request.get_json()
     rating = data.get('rating')
     comment = data.get('comment')
 
-    if not rating or not (1 <= rating <= 5):
+    if not rating or not (1 <= int(rating) <= 5):
         return jsonify({'message': 'Rating must be between 1 and 5'}), 400
 
-    feedback = Feedback(booking_id=booking_id, user_id=current_user.user_id, rating=rating, comment=comment)
-    db.session.add(feedback)
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.user_id != current_user.user_id:
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    booking.rating      = int(rating)
+    booking.comment     = comment
+    booking.feedback_at = datetime.utcnow()
     db.session.commit()
 
     return jsonify({'message': 'Feedback submitted successfully'})

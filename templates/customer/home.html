@@ -51,9 +51,9 @@
     <a href="{{ url_for('bookings.booking_detail', booking_id=b.booking_id) }}"
        class="ch-booking-card status-{{ b.booking_status | lower }}">
       <div class="ch-bc-left">
-        <span class="ch-bc-avatar">{{ b.flavor[0].upper() }}</span>
+        <span class="ch-bc-avatar">{{ b.spec.flavor[0].upper() if b.spec and b.spec.flavor else '?' }}</span>
         <div>
-          <span class="ch-bc-flavor">{{ b.flavor }}</span>
+          <span class="ch-bc-flavor">{{ b.spec.flavor if b.spec else '—' }}</span>
           <span class="ch-bc-date">{{ b.pickup_date.strftime('%B %d, %Y') if b.pickup_date else '—' }}</span>
         </div>
       </div>
@@ -102,7 +102,7 @@
       {% endif %}
       <div class="ch-gallery-info">
         <span class="ch-gallery-name">{{ cake.design_name }}</span>
-        <span class="ch-gallery-cat">{{ cake.category }}</span>
+        <span class="ch-gallery-cat">{{ cake.category.name }}</span>
       </div>
     </div>
     {% endfor %}

@@ -99,11 +99,11 @@ const BY_DAY = {
       id:     {{ b.booking_id }},
       name:   "{{ users[b.user_id].name | e if b.user_id in users else 'Unknown' }}",
       email:  "{{ users[b.user_id].email | e if b.user_id in users else '' }}",
-      cake:   "{{ b.flavor | e }}",
-      size:   "{{ b.size | e if b.size else '—' }}",
-      notes:  "{{ b.design_notes | e if b.design_notes else '' }}",
+      cake:   "{{ b.spec.flavor | e if b.spec else '—' }}",
+      size:   "{{ b.spec.size | e if b.spec else '—' }}",
+      notes:  "{{ b.spec.theme | e if b.spec and b.spec.theme else '' }}",
       price:  "{{ '₱%.2f' | format(b.total_price | float) if b.total_price else '—' }}",
-      time:   "{{ b.special_notes | e if b.special_notes else '' }}"
+      time:   "{{ b.pickup_time | e if b.pickup_time else '' }}"
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]{% if not loop.last %},{% endif %}

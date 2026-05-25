@@ -385,8 +385,11 @@ var orders = RECENT_ORDERS.map(o => ({
   quantity:     o.quantity,
   budget:       o.budget,
   pay_method:   o.pay_method,
-  design_notes: o.design_notes,
-  special_notes:o.special_notes,
+  theme:        o.theme,
+  notes:        o.notes,
+  phone:        o.phone,
+  cake_message: o.cake_message,
+  pickup_time:  o.event_time,
   dateStr: o.event_date
     ? new Date(o.event_date).toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'2-digit' })
     : '—',
@@ -549,8 +552,11 @@ function showDetail(o) {
     <div class="detail-item"><label>Budget</label><span>₱${o.budget.toLocaleString()}</span></div>
     <div class="detail-item"><label>Payment</label><span>${o.pay_method}</span></div>
     <div class="detail-item"><label>Status</label><span class="badge ${badgeClass(o.status)}">${o.status}</span></div>
-    ${o.design_notes  ? `<div class="detail-item detail-full"><label>Design Notes</label><span>${o.design_notes}</span></div>` : ''}
-    ${o.special_notes ? `<div class="detail-item detail-full"><label>Special Notes</label><span>${o.special_notes}</span></div>` : ''}
+    ${o.theme        ? `<div class="detail-item detail-full"><label>Theme</label><span>${o.theme}</span></div>` : ''}
+    ${o.cake_message ? `<div class="detail-item detail-full"><label>Cake Message</label><span>${o.cake_message}</span></div>` : ''}
+    ${o.phone        ? `<div class="detail-item"><label>Phone</label><span>${o.phone}</span></div>` : ''}
+    ${o.pickup_time  ? `<div class="detail-item"><label>Pickup Time</label><span>${o.pickup_time}</span></div>` : ''}
+    ${o.notes        ? `<div class="detail-item detail-full"><label>Notes</label><span>${o.notes}</span></div>` : ''}
   `;
   document.getElementById('detailOverlay').classList.add('open');
 }

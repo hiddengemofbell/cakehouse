@@ -31,7 +31,7 @@
   <!-- Gallery Grid -->
   <div class="gallery-grid">
     {% for cake in cakes %}
-    <figure class="gallery-item" data-category="{{ cake.category }}" data-id="{{ cake.cake_id }}">
+    <figure class="gallery-item" data-category="{{ cake.category.name.name }}" data-id="{{ cake.cake_id }}">
 
       {% if cake.image_url %}
         <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
@@ -43,7 +43,7 @@
 
       <!-- Overlay -->
       <div class="overlay">
-        <span class="overlay-tag">{{ cake.category }}</span>
+        <span class="overlay-tag">{{ cake.category.name }}</span>
         <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
         <p class="overlay-uploader">Liza's Cakehouse</p>
       </div>

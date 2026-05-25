@@ -40,7 +40,7 @@
 
         <div class="bki-left">
           <span class="bki-label">Type of Cake</span>
-          <span class="bki-value">{{ b.flavor }}</span>
+          <span class="bki-value">{{ b.spec.flavor if b.spec else '—' }}</span>
           <span class="bki-label" style="margin-top:6px;">Pick up date</span>
           <span class="bki-value">
             {{ b.pickup_date.strftime('%B %d, %Y') if b.pickup_date else '—' }}

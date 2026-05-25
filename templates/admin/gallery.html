@@ -40,7 +40,7 @@
     </h2>
     <div class="gallery-grid" style="margin-top:16px;">
       {% for cake in pending %}
-      <figure class="gallery-item pending-item" data-category="{{ cake.category }}">
+      <figure class="gallery-item pending-item" data-category="{{ cake.category.name.name }}">
         {% if cake.image_url %}
           <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
         {% else %}
@@ -50,7 +50,7 @@
         {% endif %}
 
         <div class="overlay">
-          <span class="overlay-tag">{{ cake.category }} &bull; 🕐 Pending</span>
+          <span class="overlay-tag">{{ cake.category.name }} &bull; 🕐 Pending</span>
           <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
           <div style="display:flex; gap:8px; margin-top:8px;">
             <form action="{{ url_for('admin.approve_cake', cake_id=cake.cake_id) }}" method="POST">
@@ -84,7 +84,7 @@
 
     <div class="gallery-grid" id="approvedGrid" style="margin-top:16px;">
       {% for cake in cakes %}
-      <figure class="gallery-item" data-category="{{ cake.category }}">
+      <figure class="gallery-item" data-category="{{ cake.category.name.name }}">
         {% if cake.image_url %}
           <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}">
         {% else %}
@@ -94,14 +94,14 @@
         {% endif %}
 
         <div class="overlay">
-          <span class="overlay-tag">{{ cake.category }} &bull; {{ '✅ Visible' if cake.is_visible else '🚫 Hidden' }}</span>
+          <span class="overlay-tag">{{ cake.category.name }} &bull; {{ '✅ Visible' if cake.is_visible else '🚫 Hidden' }}</span>
           <figcaption class="overlay-title">{{ cake.design_name }}</figcaption>
           <div style="display:flex; gap:8px; margin-top:8px;">
             <button class="btn btn-xs btn-warning edit-btn"
                     data-id="{{ cake.cake_id }}"
                     data-name="{{ cake.design_name|e }}"
                     data-desc="{{ cake.description|e if cake.description else '' }}"
-                    data-cat="{{ cake.category }}"
+                    data-cat="{{ cake.category.name.name }}"
                     data-img="{{ cake.image_url if cake.image_url else '' }}"
                     data-visible="{{ cake.is_visible|lower }}">
               Edit
