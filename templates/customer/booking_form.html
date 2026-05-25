@@ -44,13 +44,19 @@
 
       <div class="bk-field">
         <label class="bk-label" for="phone">Phone Number</label>
-        <input class="bk-input" type="tel" id="phone" name="phone"
+        <input class="bk-input {% if field_errors.phone %}bk-input-error{% endif %}"
+               type="tel" id="phone" name="phone"
+               value="{{ fd.get('phone', '') }}"
                placeholder="0XXX XXX XXXX" required>
+        {% if field_errors.phone %}
+          <span class="bk-field-error">{{ field_errors.phone }}</span>
+        {% endif %}
       </div>
 
       <div class="bk-field">
         <label class="bk-label" for="social">Social Media <span class="bk-optional">(Optional)</span></label>
         <input class="bk-input" type="text" id="social" name="social"
+               value="{{ fd.get('social', '') }}"
                placeholder="Instagram / Facebook">
       </div>
     </div>
@@ -82,6 +88,7 @@
       <div class="bk-field">
         <label class="bk-label" for="theme">Theme / Design</label>
         <input class="bk-input" type="text" id="theme" name="theme"
+               value="{{ fd.get('theme', '') }}"
                placeholder="e.g. Floral, Unicorn, Marble..." required>
       </div>
 
@@ -89,16 +96,19 @@
         <div class="bk-field">
           <label class="bk-label" for="size">Size</label>
           <input class="bk-input" type="text" id="size" name="size"
+                 value="{{ fd.get('size', '') }}"
                  placeholder='e.g. 6", 8", 10"' required>
         </div>
         <div class="bk-field">
           <label class="bk-label" for="layers">Layers</label>
           <input class="bk-input" type="text" id="layers" name="layers"
+                 value="{{ fd.get('layers', '') }}"
                  placeholder="e.g. 1, 2, 3">
         </div>
         <div class="bk-field">
           <label class="bk-label" for="motif">Motif / Color</label>
           <input class="bk-input" type="text" id="motif" name="motif"
+                 value="{{ fd.get('motif', '') }}"
                  placeholder="e.g. Pastel pink, Gold">
         </div>
       </div>
@@ -107,6 +117,7 @@
       <div class="bk-field">
         <label class="bk-label" for="cake_message">Cake Message</label>
         <input class="bk-input" type="text" id="cake_message" name="cake_message"
+               value="{{ fd.get('cake_message', '') }}"
                placeholder="To / From (e.g. Happy Birthday, Ana! ♡ Mom)">
       </div>
 
@@ -115,10 +126,12 @@
         <div class="bk-field">
           <label class="bk-label" for="pickup_date_display">Pickup Date</label>
           <!-- Hidden real input submitted to server -->
-          <input type="hidden" id="pickup_date" name="pickup_date">
+          <input type="hidden" id="pickup_date" name="pickup_date" value="{{ fd.get('pickup_date', '') }}">
           <!-- Visible display input that triggers custom calendar -->
           <div class="datepicker-wrap">
-            <input class="bk-input datepicker-input" type="text" id="pickup_date_display"
+            <input class="bk-input datepicker-input {% if field_errors.pickup_date %}bk-input-error{% endif %}"
+                   type="text" id="pickup_date_display"
+                   value="{{ fd.get('pickup_date_display', '') }}"
                    placeholder="Select a date" autocomplete="off" readonly required>
             <span class="datepicker-icon" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -136,6 +149,9 @@
               <div class="cal-days" id="calDays"></div>
             </div>
           </div>
+          {% if field_errors.pickup_date %}
+            <span class="bk-field-error">{{ field_errors.pickup_date }}</span>
+          {% endif %}
         </div>
         <div class="bk-field">
           <label class="bk-label" for="pickup_time_display">Pickup Time</label>
@@ -147,25 +163,16 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </span>
             <div class="custom-timepicker" id="customTimepicker" hidden>
-              <div class="tp-cols">
-                <!-- Hours -->
-                <div class="tp-col">
-                  <button type="button" class="tp-arrow" id="hrUp">&#8249;</button>
-                  <div class="tp-scroll" id="hrList"></div>
-                  <button type="button" class="tp-arrow" id="hrDown">&#8250;</button>
-                </div>
-                <span class="tp-colon">:</span>
-                <!-- Minutes -->
-                <div class="tp-col">
-                  <button type="button" class="tp-arrow" id="minUp">&#8249;</button>
-                  <div class="tp-scroll" id="minList"></div>
-                  <button type="button" class="tp-arrow" id="minDown">&#8250;</button>
-                </div>
-                <!-- AM/PM -->
-                <div class="tp-col tp-ampm-col">
-                  <button type="button" class="tp-ampm-btn" id="amBtn">AM</button>
-                  <button type="button" class="tp-ampm-btn" id="pmBtn">PM</button>
-                </div>
+              <div class="tp-drum-picker">
+                <!-- Selection highlight band -->
+                <div class="tp-band" aria-hidden="true"></div>
+                <!-- Hours drum -->
+                <div class="tp-drum" id="hrDrum"></div>
+                <span class="tp-colon" aria-hidden="true">:</span>
+                <!-- Minutes drum -->
+                <div class="tp-drum" id="minDrum"></div>
+                <!-- AM/PM drum -->
+                <div class="tp-drum tp-ampm-drum" id="ampmDrum"></div>
               </div>
               <button type="button" class="tp-confirm" id="tpConfirm">Set Time</button>
             </div>
@@ -177,13 +184,10 @@
       <div class="bk-field">
         <label class="bk-label" for="flavor">Flavor</label>
         <select class="bk-input" id="flavor" name="flavor" required>
-          <option value="" disabled selected>Select a flavor</option>
-          <option value="Chocolate">Chocolate</option>
-          <option value="Vanilla">Vanilla</option>
-          <option value="Red Velvet">Red Velvet</option>
-          <option value="Matcha">Matcha</option>
-          <option value="Strawberry">Strawberry</option>
-          <option value="Caramel">Caramel</option>
+          <option value="" disabled {% if not fd.get('flavor') %}selected{% endif %}>Select a flavor</option>
+          {% for f in ['Chocolate','Vanilla','Red Velvet','Matcha','Strawberry','Caramel'] %}
+          <option value="{{ f }}" {% if fd.get('flavor') == f %}selected{% endif %}>{{ f }}</option>
+          {% endfor %}
         </select>
       </div>
 
@@ -191,31 +195,80 @@
       <div class="bk-field">
         <label class="bk-label" for="quantity">Quantity</label>
         <input class="bk-input" type="number" id="quantity" name="quantity"
-              min="1" value="1" required>
+              min="1" value="{{ fd.get('quantity', '1') }}" required>
       </div>
 
       <!-- Budget -->
       <div class="bk-field">
-        <label class="bk-label" for="budget">Budget</label>
-        <select class="bk-input" id="budget" name="budget" required>
-          <option value="" disabled selected>Select your budget range</option>
-          <option value="500">₱500 and below</option>
-          <option value="1000">₱500 - ₱1,000</option>
-          <option value="2000">₱1,000 - ₱2,000</option>
-          <option value="5000">₱2,000 - ₱5,000</option>
-          <option value="10000">₱5,000 - ₱10,000</option>
-          <option value="999999">No budget limit</option>
-        </select>
+        <label class="bk-label">Budget</label>
+        <p class="bk-sublabel">Pick the range that fits your celebration — we'll design the best cake within it.</p>
+        <div class="budget-grid">
+
+          <label class="budget-card">
+            <input type="radio" name="budget" value="500" required {% if fd.get('budget') == '500' %}checked{% endif %}>
+            <div class="budget-card-inner">
+              <span class="budget-emoji">🍰</span>
+              <span class="budget-range">Under ₱500</span>
+              <span class="budget-desc">Simple single-tier cake, great for small celebrations or surprise treats.</span>
+            </div>
+          </label>
+
+          <label class="budget-card">
+            <input type="radio" name="budget" value="1000" {% if fd.get('budget') == '1000' %}checked{% endif %}>
+            <div class="budget-card-inner">
+              <span class="budget-emoji">🎂</span>
+              <span class="budget-range">₱500 – ₱1,000</span>
+              <span class="budget-desc">Classic custom cake with basic decorations — perfect for birthdays & get-togethers.</span>
+            </div>
+          </label>
+
+          <label class="budget-card">
+            <input type="radio" name="budget" value="2000" {% if fd.get('budget') == '2000' %}checked{% endif %}>
+            <div class="budget-card-inner">
+              <span class="budget-emoji">✨</span>
+              <span class="budget-range">₱1,000 – ₱2,000</span>
+              <span class="budget-desc">Themed or layered cakes with flowers, fondant, or detailed piping work.</span>
+            </div>
+          </label>
+
+          <label class="budget-card">
+            <input type="radio" name="budget" value="5000" {% if fd.get('budget') == '5000' %}checked{% endif %}>
+            <div class="budget-card-inner">
+              <span class="budget-emoji">🌸</span>
+              <span class="budget-range">₱2,000 – ₱5,000</span>
+              <span class="budget-desc">Multi-tier or highly detailed designs — ideal for debuts, anniversaries, and special events.</span>
+            </div>
+          </label>
+
+          <label class="budget-card">
+            <input type="radio" name="budget" value="10000" {% if fd.get('budget') == '10000' %}checked{% endif %}>
+            <div class="budget-card-inner">
+              <span class="budget-emoji">💍</span>
+              <span class="budget-range">₱5,000 – ₱10,000</span>
+              <span class="budget-desc">Premium wedding or grand celebration cakes with intricate, handcrafted details.</span>
+            </div>
+          </label>
+
+          <label class="budget-card">
+            <input type="radio" name="budget" value="999999" {% if fd.get('budget') == '999999' %}checked{% endif %}>
+            <div class="budget-card-inner">
+              <span class="budget-emoji">👑</span>
+              <span class="budget-range">No Limit</span>
+              <span class="budget-desc">Let's create something extraordinary — we'll bring your dream cake to life, no constraints.</span>
+            </div>
+          </label>
+
+        </div>
       </div>
 
       <!-- Payment Method -->
       <div class="bk-field">
         <label class="bk-label" for="pay_method">Payment Method</label>
         <select class="bk-input" id="pay_method" name="pay_method" required>
-          <option value="" disabled selected>Select payment method</option>
-          <option value="Cash">Cash</option>
-          <option value="GCash">GCash</option>
-          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="" disabled {% if not fd.get('pay_method') %}selected{% endif %}>Select payment method</option>
+          {% for pm in ['Cash', 'GCash', 'Bank Transfer'] %}
+          <option value="{{ pm }}" {% if fd.get('pay_method') == pm %}selected{% endif %}>{{ pm }}</option>
+          {% endfor %}
         </select>
       </div>
 
@@ -223,7 +276,7 @@
       <div class="bk-field">
         <label class="bk-label" for="notes">Notes</label>
         <textarea class="bk-input bk-textarea" id="notes" name="notes"
-                  placeholder="Additional details..."></textarea>
+                  placeholder="Additional details...">{{ fd.get('notes', '') }}</textarea>
       </div>
     </div>
 
@@ -325,65 +378,104 @@
     }
   });
 
-  /* ── Custom Time Picker ── */
-  const tpDisplay  = document.getElementById('pickup_time_display');
-  const tpHidden   = document.getElementById('pickup_time');
-  const tp         = document.getElementById('customTimepicker');
-  const hrList     = document.getElementById('hrList');
-  const minList    = document.getElementById('minList');
-  const amBtn      = document.getElementById('amBtn');
-  const pmBtn      = document.getElementById('pmBtn');
+  /* ── Drum-scroll Time Picker ── */
+  const tpDisplay = document.getElementById('pickup_time_display');
+  const tpHidden  = document.getElementById('pickup_time');
+  const tp        = document.getElementById('customTimepicker');
+  const hrDrum    = document.getElementById('hrDrum');
+  const minDrum   = document.getElementById('minDrum');
+  const ampmDrum  = document.getElementById('ampmDrum');
 
-  let selHour = 12, selMin = 0, selPeriod = 'AM';
+  const ITEM_H = 44; // px — height of each drum row
 
-  function buildList(el, count, padded, selected, onSelect) {
+  // Build a scrollable drum column
+  function buildDrum(el, items, initialIndex) {
     el.innerHTML = '';
-    for (let i = (padded ? 0 : 1); i <= count; i++) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'tp-item' + (i === selected ? ' active' : '');
-      btn.textContent = padded ? String(i).padStart(2, '0') : String(i).padStart(2, '0');
-      btn.addEventListener('click', () => onSelect(i));
-      el.appendChild(btn);
+    // Ghost padding items so first & last can center
+    const pad = 2;
+    for (let p = 0; p < pad; p++) {
+      const ghost = document.createElement('div');
+      ghost.className = 'tp-drum-item tp-ghost';
+      el.appendChild(ghost);
     }
-    // Scroll active item into center
-    const active = el.querySelector('.active');
-    if (active) active.scrollIntoView({ block: 'center' });
+    items.forEach(label => {
+      const item = document.createElement('div');
+      item.className = 'tp-drum-item';
+      item.textContent = label;
+      el.appendChild(item);
+    });
+    for (let p = 0; p < pad; p++) {
+      const ghost = document.createElement('div');
+      ghost.className = 'tp-drum-item tp-ghost';
+      el.appendChild(ghost);
+    }
+    // Scroll to initial selection without animation
+    el.scrollTop = initialIndex * ITEM_H;
+    updateActive(el);
   }
 
-  function renderTP() {
-    buildList(hrList, 12, false, selHour, h => { selHour = h; renderTP(); });
-    buildList(minList, 59, true, selMin, m => { selMin = m; renderTP(); });
-    amBtn.classList.toggle('active', selPeriod === 'AM');
-    pmBtn.classList.toggle('active', selPeriod === 'PM');
+  function updateActive(drum) {
+    const idx = Math.round(drum.scrollTop / ITEM_H);
+    drum.querySelectorAll('.tp-drum-item:not(.tp-ghost)').forEach((el, i) => {
+      el.classList.toggle('tp-selected', i === idx);
+    });
   }
 
-  amBtn.addEventListener('click', () => { selPeriod = 'AM'; renderTP(); });
-  pmBtn.addEventListener('click', () => { selPeriod = 'PM'; renderTP(); });
+  function getSelectedIndex(drum) {
+    return Math.round(drum.scrollTop / ITEM_H);
+  }
 
-  document.getElementById('hrUp').addEventListener('click', () => { selHour = selHour > 1 ? selHour - 1 : 12; renderTP(); });
-  document.getElementById('hrDown').addEventListener('click', () => { selHour = selHour < 12 ? selHour + 1 : 1; renderTP(); });
-  document.getElementById('minUp').addEventListener('click', () => { selMin = selMin > 0 ? selMin - 1 : 59; renderTP(); });
-  document.getElementById('minDown').addEventListener('click', () => { selMin = selMin < 59 ? selMin + 1 : 0; renderTP(); });
+  function snapDrum(drum) {
+    const idx = Math.round(drum.scrollTop / ITEM_H);
+    drum.scrollTo({ top: idx * ITEM_H, behavior: 'smooth' });
+  }
+
+  function onDrumScroll(drum) {
+    clearTimeout(drum._snapTimer);
+    drum._snapTimer = setTimeout(() => {
+      snapDrum(drum);
+      updateActive(drum);
+    }, 120);
+  }
+
+  // Hours 1–12, Minutes 00–59, AM/PM
+  const hours   = Array.from({length: 12}, (_, i) => String(i + 1).padStart(2, '0'));
+  const minutes = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
+  const ampm    = ['AM', 'PM'];
+
+  function initDrums() {
+    buildDrum(hrDrum,   hours,   11); // default 12
+    buildDrum(minDrum,  minutes, 0);  // default 00
+    buildDrum(ampmDrum, ampm,    0);  // default AM
+  }
+
+  [hrDrum, minDrum, ampmDrum].forEach(drum => {
+    drum.addEventListener('scroll', () => onDrumScroll(drum));
+  });
 
   document.getElementById('tpConfirm').addEventListener('click', () => {
-    const hDisp  = String(selHour).padStart(2, '0');
-    const mDisp  = String(selMin).padStart(2, '0');
-    tpDisplay.value = `${hDisp}:${mDisp} ${selPeriod}`;
-    // Convert to 24h for server
-    let h24 = selHour % 12;
-    if (selPeriod === 'PM') h24 += 12;
-    tpHidden.value = `${String(h24).padStart(2,'0')}:${mDisp}`;
+    const hIdx    = getSelectedIndex(hrDrum);
+    const mIdx    = getSelectedIndex(minDrum);
+    const apIdx   = getSelectedIndex(ampmDrum);
+
+    const h12  = hIdx + 1;
+    const min  = mIdx;
+    const period = ampm[apIdx] || 'AM';
+
+    tpDisplay.value = `${String(h12).padStart(2,'0')}:${String(min).padStart(2,'0')} ${period}`;
+
+    let h24 = h12 % 12;
+    if (period === 'PM') h24 += 12;
+    tpHidden.value = `${String(h24).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
     tp.hidden = true;
   });
 
-  // Prevent clicks inside the picker from bubbling to document
   tp.addEventListener('click', e => e.stopPropagation());
 
   tpDisplay.addEventListener('click', e => {
     e.stopPropagation();
     tp.hidden = !tp.hidden;
-    if (!tp.hidden) renderTP();
+    if (!tp.hidden) initDrums();
   });
 
   document.addEventListener('click', e => {

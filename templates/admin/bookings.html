@@ -77,6 +77,10 @@
             {% if b.total_price %}₱{{ '%.2f' | format(b.total_price | float) }}{% else %}—{% endif %}
           </span>
         </div>
+        <div class="bkmgmt-detail">
+          <span class="bkmgmt-detail-label">Budget</span>
+          <span class="bkmgmt-detail-value">{{ b.budget | budget_label }}</span>
+        </div>
       </div>
 
       <!-- Design notes -->

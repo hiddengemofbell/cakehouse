@@ -45,6 +45,11 @@
         </div>
 
         <div class="bkd-field">
+          <span class="bkd-lbl">Budget Range</span>
+          <span class="bkd-val">{{ b.budget | budget_label }}</span>
+        </div>
+
+        <div class="bkd-field">
           <span class="bkd-lbl">Total Price</span>
           <span class="bkd-val">{{ '₱%.2f' | format(b.total_price | float) if b.total_price else 'Pending' }}</span>
         </div>

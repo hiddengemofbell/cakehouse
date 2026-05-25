@@ -10,19 +10,57 @@ bookings_bp = Blueprint('bookings', __name__)
 @login_required
 def place_booking():
     if request.method == 'POST':
-        # Build design_notes from order detail fields
-        theme   = request.form.get('theme', '').strip()
-        size    = request.form.get('size', '').strip()
-        layers  = request.form.get('layers', '').strip()
-        motif   = request.form.get('motif', '').strip()
-        design_notes = f"Theme: {theme} | Size: {size} | Layers: {layers} | Motif/Color: {motif}"
+        from datetime import datetime, timezone, timedelta
 
-        # Build special_notes from contact extras + cake message + notes
-        phone       = request.form.get('phone', '').strip()
-        social      = request.form.get('social', '').strip()
-        cake_msg    = request.form.get('cake_message', '').strip()
-        extra_notes = request.form.get('notes', '').strip()
-        pickup_time = request.form.get('pickup_time', '').strip()
+        # Collect all form values so we can send them back if there's an error
+        fd = {k: request.form.get(k, '') for k in request.form}
+        field_errors = {}   # { field_name: error message }
+
+        theme   = fd.get('theme', '').strip()
+        size    = fd.get('size', '').strip()
+        layers  = fd.get('layers', '').strip()
+        motif   = fd.get('motif', '').strip()
+        phone       = fd.get('phone', '').strip()
+        social      = fd.get('social', '').strip()
+        cake_msg    = fd.get('cake_message', '').strip()
+        extra_notes = fd.get('notes', '').strip()
+        pickup_time = fd.get('pickup_time', '').strip()
+        pickup_date_str = fd.get('pickup_date', '').strip()
+
+        # ── Phone validation ──
+        _, phone_errors = validate(BookingSchema, {'phone': phone})
+        if phone_errors:
+            field_errors['phone'] = phone_errors[0]
+
+        # ── Business hours check (8 AM – 10 PM Philippine Time) ──
+        PH_TZ = timezone(timedelta(hours=8))
+        now_ph = datetime.now(PH_TZ)
+        if now_ph.hour < 8 or now_ph.hour >= 22:
+            field_errors['pickup_date'] = 'We only accept bookings from 8:00 AM – 10:00 PM (PH Time).'
+
+        # ── Pickup date + daily limit check ──
+        pickup_date = None
+        if not pickup_date_str:
+            field_errors['pickup_date'] = 'Please select a pickup date.'
+        else:
+            try:
+                pickup_date = datetime.strptime(pickup_date_str, '%Y-%m-%d').date()
+                existing = Booking.query.filter_by(
+                    pickup_date=pickup_date,
+                    booking_status='Pending'
+                ).count()
+                if existing >= 3:
+                    field_errors['pickup_date'] = 'This date is fully booked. Please choose another date.'
+            except ValueError:
+                field_errors['pickup_date'] = 'Invalid date selected.'
+
+        # ── If any errors, re-render form with data intact ──
+        if field_errors:
+            return render_template('customer/booking_form.html',
+                                   fd=fd, field_errors=field_errors)
+
+        # ── All good — save booking ──
+        design_notes = f"Theme: {theme} | Size: {size} | Layers: {layers} | Motif/Color: {motif}"
         special_notes_parts = []
         if phone:        special_notes_parts.append(f"Phone: {phone}")
         if social:       special_notes_parts.append(f"Social: {social}")
@@ -31,52 +69,23 @@ def place_booking():
         if extra_notes:  special_notes_parts.append(f"Notes: {extra_notes}")
         special_notes = " | ".join(special_notes_parts)
 
-        # ── Pydantic validation ──
-        _, errors = validate(BookingSchema, {
-            'phone': phone,
-        })
-        if errors:
-            for e in errors:
-                flash(e, 'error')
-            return redirect(url_for('bookings.place_booking'))
-
-        # ── Business hours check (8 AM – 10 PM Philippine Time) ──
-        from datetime import date as date_type, datetime, timezone, timedelta
-        PH_TZ = timezone(timedelta(hours=8))
-        now_ph = datetime.now(PH_TZ)
-        if now_ph.hour < 8 or now_ph.hour >= 22:
-            flash('Sorry! We only accept bookings from 8:00 AM to 10:00 PM (Philippine Time).', 'error')
-            return redirect(url_for('bookings.place_booking'))
-
-        # Check 3 orders per day limit
-        pickup_date_str = request.form.get('pickup_date')
-        pickup_date = datetime.strptime(pickup_date_str, '%Y-%m-%d').date()
-        existing_bookings = Booking.query.filter_by(
-            pickup_date=pickup_date,
-            booking_status='Pending'
-        ).count()
-
-        if existing_bookings >= 3:
-            flash('Sorry! This date is fully booked. Please choose another date.', 'error')
-            return redirect(url_for('bookings.place_booking'))
-
         new_booking = Booking(
             user_id=current_user.user_id,
-            flavor=request.form.get('flavor', 'Custom'),
+            flavor=fd.get('flavor', 'Custom'),
             size=size,
             design_notes=design_notes,
             special_notes=special_notes or None,
-            quantity=int(request.form.get('quantity', 1)),
+            quantity=int(fd.get('quantity', 1) or 1),
             pickup_date=pickup_date,
-            budget=request.form.get('budget', 0),
-            pay_method=request.form.get('pay_method', 'TBD')
+            budget=fd.get('budget', 0),
+            pay_method=fd.get('pay_method', 'TBD')
         )
         db.session.add(new_booking)
         db.session.commit()
         flash('Your booking has been submitted! We\'ll get back to you soon.', 'success')
         return redirect(url_for('bookings.place_booking'))
 
-    return render_template('customer/booking_form.html')
+    return render_template('customer/booking_form.html', fd={}, field_errors={})
 
 @bookings_bp.route('/bookings')
 @login_required

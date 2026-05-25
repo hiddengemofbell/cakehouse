@@ -44,4 +44,18 @@ def create_app():
     app.register_blueprint(gallery_bp)
     app.register_blueprint(staff_bp)
 
+    # ── Jinja2 filter: convert budget number → readable label ──
+    @app.template_filter('budget_label')
+    def budget_label(value):
+        try:
+            v = int(value)
+        except (TypeError, ValueError):
+            return '—'
+        if v <= 500:    return 'Under ₱500'
+        if v <= 1000:   return '₱500 – ₱1,000'
+        if v <= 2000:   return '₱1,000 – ₱2,000'
+        if v <= 5000:   return '₱2,000 – ₱5,000'
+        if v <= 10000:  return '₱5,000 – ₱10,000'
+        return 'No Limit'
+
     return app

@@ -2581,6 +2581,19 @@ footer::after {
     font-family: inherit;
 }
 
+.bk-input-error {
+    border-color: #e05555 !important;
+    background: #fff8f8;
+}
+
+.bk-field-error {
+    display: block;
+    font-size: 0.78rem;
+    color: #e05555;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
 .bk-input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px #c7607a18;
@@ -2606,6 +2619,71 @@ footer::after {
 /* Two-column row for Date / Time */
 .bk-row.two-col {
     grid-template-columns: 1fr 1fr;
+}
+
+/* Budget sublabel */
+.bk-sublabel {
+    font-size: 0.82rem;
+    color: var(--muted, #999);
+    margin: -4px 0 12px;
+}
+
+/* Budget card grid */
+.budget-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.budget-card {
+    cursor: pointer;
+    display: block;
+}
+
+.budget-card input[type="radio"] {
+    display: none;
+}
+
+.budget-card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1.5px solid #e8d5da;
+    border-radius: 12px;
+    padding: 14px 12px;
+    background: #fff;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.budget-card:hover .budget-card-inner {
+    border-color: var(--accent);
+    background: #fff5f7;
+}
+
+.budget-card input[type="radio"]:checked + .budget-card-inner {
+    border-color: var(--accent);
+    background: #fff0f3;
+    box-shadow: 0 0 0 3px rgba(199, 96, 122, 0.15);
+}
+
+.budget-emoji {
+    font-size: 1.4rem;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.budget-range {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.budget-desc {
+    font-size: 0.78rem;
+    color: var(--muted, #888);
+    line-height: 1.4;
 }
 
 /* Cake type radio grid */
@@ -2689,147 +2767,119 @@ footer::after {
     padding-right: 36px;
 }
 
-/* ── Custom Time Picker ── */
+/* ── Custom Time Picker (drum-scroll) ── */
 .custom-timepicker {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
     z-index: 200;
-    background: var(--bg);
+    background: #fff;
     border: 1.5px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 16px 14px;
-    box-shadow: 0 8px 32px #c7607a22;
-    width: 220px;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 32px #0000001a;
+    width: 230px;
 }
 
-.tp-cols {
+/* Drum picker row */
+.tp-drum-picker {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin-bottom: 14px;
+    gap: 0;
+    height: 220px; /* 5 visible rows × 44px */
+    overflow: hidden;
+    margin-bottom: 12px;
 }
 
-.tp-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+/* Highlight band across all columns */
+.tp-band {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    height: 44px;
+    background: #f2f2f2;
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 0;
 }
 
-.tp-arrow {
-    background: none;
-    border: none;
-    font-size: 1.3rem;
-    color: var(--accent);
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s;
-    /* rotate the chevron to point up/down */
-    transform: rotate(90deg);
-    padding: 0;
-    line-height: 1;
-}
-
-.tp-arrow:last-child {
-    transform: rotate(-90deg);
-}
-
-.tp-arrow:hover {
-    background: #c7607a15;
-}
-
-.tp-scroll {
-    height: 120px;
-    overflow-y: auto;
+/* Each scrollable drum column */
+.tp-drum {
+    flex: 1;
+    height: 220px;
+    overflow-y: scroll;
     scrollbar-width: none;
+    position: relative;
+    z-index: 1;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tp-drum::-webkit-scrollbar { display: none; }
+
+/* Each row item */
+.tp-drum-item {
+    height: 44px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 2px;
-    scroll-behavior: smooth;
-}
-
-.tp-scroll::-webkit-scrollbar { display: none; }
-
-.tp-item {
-    background: none;
-    border: none;
-    border-radius: 8px;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-    color: var(--text);
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #bbb;
     cursor: pointer;
-    width: 44px;
-    text-align: center;
-    transition: background 0.15s, color 0.15s;
+    user-select: none;
+    transition: color 0.15s, font-weight 0.15s;
 }
 
-.tp-item:hover {
-    background: #c7607a12;
-    color: var(--accent);
+.tp-drum-item.tp-ghost {
+    pointer-events: none;
 }
 
-.tp-item.active {
-    background: var(--accent);
-    color: #fff;
+.tp-drum-item.tp-selected {
+    color: #1a1a1a;
     font-weight: 700;
-    border-radius: 8px;
-}
-
-.tp-colon {
     font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
 }
 
-.tp-ampm-col {
-    gap: 6px;
-    margin-top: 2px;
+/* AM/PM drum is narrower */
+.tp-ampm-drum {
+    flex: 0 0 56px;
 }
 
-.tp-ampm-btn {
-    background: none;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.78rem;
+.tp-ampm-drum .tp-drum-item {
+    font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    width: 44px;
     letter-spacing: 0.5px;
 }
 
-.tp-ampm-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+.tp-ampm-drum .tp-drum-item.tp-selected {
+    font-size: 0.9rem;
 }
 
-.tp-ampm-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
+.tp-colon {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+    flex: 0 0 18px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2px;
 }
 
 .tp-confirm {
     width: 100%;
-    padding: 8px;
+    padding: 9px;
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    font-size: 0.82rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     cursor: pointer;
     transition: opacity 0.2s;
 }
@@ -2945,6 +2995,7 @@ footer::after {
 @media (max-width: 600px) {
     .bk-row { grid-template-columns: 1fr; }
     .cake-type-grid { grid-template-columns: 1fr; }
+    .budget-grid { grid-template-columns: 1fr 1fr; }
     .booking-card { padding: 24px 18px; }
     .custom-calendar { width: 240px; }
 }
@@ -3136,6 +3187,7 @@ footer::after {
     /* Booking form */
     .bk-row { grid-template-columns: 1fr; }
     .cake-type-grid { grid-template-columns: 1fr 1fr; }
+    .budget-grid { grid-template-columns: 1fr 1fr; }
     .booking-card { padding: 20px 16px; }
 
     /* My bookings */
