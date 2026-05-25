@@ -7,7 +7,7 @@ import json
 import cloudinary
 import cloudinary.uploader
 from modules import db
-from modules.models import User, Booking, CakeProgress, Cake, Feedback, StaffPermission, Category
+from modules.models import User, Booking, CakeProgress, Cake, Feedback, StaffPermission, Category, CakeReaction
 from modules.decorators import admin_required
 
 # Roles config file
@@ -245,6 +245,7 @@ def approve_cake(cake_id):
 @admin_required
 def reject_cake(cake_id):
     cake = Cake.query.get_or_404(cake_id)
+    CakeReaction.query.filter_by(cake_id=cake_id).delete()
     Booking.query.filter_by(cake_id=cake_id).update({'cake_id': None})
     db.session.delete(cake)
     db.session.commit()
@@ -299,6 +300,7 @@ def edit_cake(cake_id):
 @admin_required
 def delete_cake(cake_id):
     cake = Cake.query.get_or_404(cake_id)
+    CakeReaction.query.filter_by(cake_id=cake_id).delete()
     # Unlink any bookings referencing this cake before deleting
     Booking.query.filter_by(cake_id=cake_id).update({'cake_id': None})
     db.session.delete(cake)
@@ -443,10 +445,22 @@ def change_role(user_id):
 @admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
+
+    # Delete all related records first to avoid foreign key violations
+    CakeReaction.query.filter_by(user_id=user_id).delete()
+    Feedback.query.filter_by(user_id=user_id).delete()
+    CakeProgress.query.filter_by(updated_by=user_id).delete()
+
+    # Delete bookings (and their progress/feedback) belonging to this user
+    bookings = Booking.query.filter_by(user_id=user_id).all()
+    for b in bookings:
+        CakeProgress.query.filter_by(booking_id=b.booking_id).delete()
+        Feedback.query.filter_by(booking_id=b.booking_id).delete()
+        db.session.delete(b)
+
     # Delete staff permissions if exists
-    perm = StaffPermission.query.filter_by(user_id=user_id).first()
-    if perm:
-        db.session.delete(perm)
+    StaffPermission.query.filter_by(user_id=user_id).delete()
+
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User account deleted!'})

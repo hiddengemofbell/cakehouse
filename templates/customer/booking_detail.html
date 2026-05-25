@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %} Booking Details — Liza's Cakehouse {% endblock %}
+
+{% block content %}
+<section class="mybookings-section">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <span class="page-label">My Orders</span>
+    <h1 class="page-title">Booking <em>Details</em></h1>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <div class="bkd-wrap">
+
+    <div class="bkd-card status-{{ b.booking_status | lower }}">
+
+      <!-- Status badge -->
+      <div class="bkd-status-row">
+        <span class="bki-status">{{ b.booking_status }}</span>
+        <span class="bkd-id">#{{ b.booking_id }}</span>
+      </div>
+
+      <!-- Details grid -->
+      <div class="bkd-grid">
+
+        <div class="bkd-field">
+          <span class="bkd-lbl">Type of Cake</span>
+          <span class="bkd-val">{{ b.flavor }}</span>
+        </div>
+
+        <div class="bkd-field">
+          <span class="bkd-lbl">Pick Up Date</span>
+          <span class="bkd-val">{{ b.pickup_date.strftime('%B %d, %Y') if b.pickup_date else '—' }}</span>
+        </div>
+
+        <div class="bkd-field">
+          <span class="bkd-lbl">Size</span>
+          <span class="bkd-val">{{ b.size if b.size else '—' }}</span>
+        </div>
+
+        <div class="bkd-field">
+          <span class="bkd-lbl">Total Price</span>
+          <span class="bkd-val">{{ '₱%.2f' | format(b.total_price | float) if b.total_price else 'Pending' }}</span>
+        </div>
+
+        {% if b.design_notes %}
+        <div class="bkd-field bkd-full">
+          <span class="bkd-lbl">Design Notes</span>
+          <span class="bkd-val">{{ b.design_notes }}</span>
+        </div>
+        {% endif %}
+
+        {% if b.special_notes %}
+        <div class="bkd-field bkd-full">
+          <span class="bkd-lbl">Special Notes</span>
+          <span class="bkd-val">{{ b.special_notes }}</span>
+        </div>
+        {% endif %}
+
+        {% if b.booking_status == 'Declined' and b.decline_reason %}
+        <div class="bkd-field bkd-full bkd-reason">
+          <span class="bkd-lbl">Reason for Decline</span>
+          <span class="bkd-val">{{ b.decline_reason }}</span>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Actions -->
+      <div class="bkd-actions">
+        {% if b.booking_status == 'Pending' %}
+        <form method="POST"
+              action="{{ url_for('bookings.cancel_booking', booking_id=b.booking_id) }}"
+              onsubmit="return confirm('Cancel this order?')">
+          <button type="submit" class="bki-cancel">Cancel Order</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('main.booking_page') }}" class="bkd-back">← Back to My Bookings</a>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<style>
+.bkd-wrap {
+  max-width: 620px;
+  margin: 0 auto 80px;
+  padding: 0 20px;
+}
+
+.bkd-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px;
+  border: 1.5px solid #ececec;
+  box-shadow: 0 2px 16px #0000060a;
+}
+
+.bkd-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.bkd-id {
+  font-size: 0.8rem;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.bkd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  margin-bottom: 28px;
+}
+
+.bkd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bkd-full {
+  grid-column: 1 / -1;
+}
+
+.bkd-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+.bkd-val {
+  font-size: 0.95rem;
+  color: #222;
+  font-weight: 500;
+}
+
+.bkd-reason {
+  background: #fff0f3;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--accent);
+}
+
+.bkd-reason .bkd-lbl { color: var(--accent); }
+
+.bkd-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bkd-back {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.bkd-back:hover { text-decoration: underline; }
+
+/* Card color tinting based on status */
+.bkd-card.status-accepted { border-color: #86c98033; background: #f4fbf4; }
+.bkd-card.status-declined { border-color: #f0888833; background: #fff5f5; }
+.bkd-card.status-cancelled { border-color: #d0d0d033; background: #f9f9f9; }
+.bkd-card.status-pending { border-color: var(--accent-light, #f9c6d8); }
+</style>
+
+{% endblock %}

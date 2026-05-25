@@ -35,7 +35,8 @@
     </a>
     {% if bookings %}
       {% for b in bookings %}
-      <div class="booking-card-item status-{{ b.booking_status | lower }}">
+      <a href="{{ url_for('bookings.booking_detail', booking_id=b.booking_id) }}"
+         class="booking-card-item status-{{ b.booking_status | lower }}">
 
         <div class="bki-left">
           <span class="bki-label">Type of Cake</span>
@@ -51,16 +52,9 @@
           {% if b.booking_status == 'Declined' and b.decline_reason %}
           <span class="bki-reason">{{ b.decline_reason }}</span>
           {% endif %}
-          {% if b.booking_status == 'Pending' %}
-          <form method="POST"
-                action="{{ url_for('bookings.cancel_booking', booking_id=b.booking_id) }}"
-                onsubmit="return confirm('Cancel this order?')">
-            <button type="submit" class="bki-cancel">Cancel Order</button>
-          </form>
-          {% endif %}
         </div>
 
-      </div>
+      </a>
       {% endfor %}
     {% else %}
       <p class="mybookings-empty">You haven't booked anything yet</p>

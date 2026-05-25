@@ -17,7 +17,7 @@
             <h1 class="title">Baked with love,<br>served with<br>warmth.</h1>
             <p class="body-text">From birthdays to weddings, we craft custom cakes made just for you. Browse our designs, place your order, and let us handle the rest.</p>
             <div class="hero-actions">
-                <a href="#" class="cta-btn1">Design Your Own Cake!</a>
+                <a href="{{ url_for('main.booking_page') }}" class="cta-btn1">Design Your Own Cake!</a>
                 <a href="{{ url_for('gallery.gallery') }}" class="cta-btn2">Browse Gallery →</a>
             </div>
         </div>
@@ -28,29 +28,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Stats bar -->
-    <ul class="stats-bar" aria-label="Business highlights">
-        <li class="stat">
-            <span class="stat-num">500+</span>
-            <span class="stat-label">Happy Customers</span>
-        </li>
-        <li class="stat-divider" aria-hidden="true"></li>
-        <li class="stat">
-            <span class="stat-num">100%</span>
-            <span class="stat-label">Handcrafted</span>
-        </li>
-        <li class="stat-divider" aria-hidden="true"></li>
-        <li class="stat">
-            <span class="stat-num">50+</span>
-            <span class="stat-label">Unique Designs</span>
-        </li>
-        <li class="stat-divider" aria-hidden="true"></li>
-        <li class="stat">
-            <span class="stat-num">5★</span>
-            <span class="stat-label">Average Rating</span>
-        </li>
-    </ul>
 </section>
 
 <!-- ── HOW IT WORKS ── -->

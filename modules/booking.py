@@ -104,6 +104,15 @@ def booking_progress(booking_id):
         'updated_at': progress.updated_at.isoformat()
     })
 
+@bookings_bp.route('/bookings/<int:booking_id>')
+@login_required
+def booking_detail(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.user_id != current_user.user_id:
+        flash('Unauthorized.', 'error')
+        return redirect(url_for('main.booking_page'))
+    return render_template('customer/booking_detail.html', b=booking)
+
 @bookings_bp.route('/bookings/<int:booking_id>/cancel', methods=['POST'])
 @login_required
 def cancel_booking(booking_id):

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user
 from modules.decorators import customer_required
-from modules.models import Booking
+from modules.models import Booking, Cake
 
 main_bp = Blueprint('main', __name__)
 
@@ -32,7 +32,17 @@ def dashboard():
 @main_bp.route('/home')
 @customer_required
 def home():
-    return render_template('customer/home.html')
+    bookings = Booking.query.filter_by(user_id=current_user.user_id)\
+                            .order_by(Booking.created_at.desc()).limit(3).all()
+    featured = Cake.query.filter_by(is_approved=True, is_visible=True)\
+                         .order_by(Cake.created_at.desc()).limit(4).all()
+    pending_count  = Booking.query.filter_by(user_id=current_user.user_id, booking_status='Pending').count()
+    accepted_count = Booking.query.filter_by(user_id=current_user.user_id, booking_status='Accepted').count()
+    return render_template('customer/home.html',
+                           bookings=bookings,
+                           featured=featured,
+                           pending_count=pending_count,
+                           accepted_count=accepted_count)
 
 # Logged-in customers only
 @main_bp.route('/booking_page')

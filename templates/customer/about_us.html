@@ -3,7 +3,335 @@
 {% block title %} About Us — Liza's Cakehouse {% endblock %}
 
 {% block content %}
-<section>
-  <h1>This is the About Us Page</h1>
-</section>
+<div class="about-page">
+
+  <!-- ═══ HERO SECTION ═══ -->
+  <section class="about-hero">
+    <h1 class="about-hero-title">Liza's Cake House</h1>
+    <p class="about-hero-tagline">
+      Your neighborhood bakery in the heart of Siniloan, where every celebration
+      is made sweeter — one cake at a time.
+    </p>
+    <p class="about-hero-body">
+      We specialize in crafting beautiful, handmade cakes and sweet treats tailored to your most
+      cherished moments. Whether it's a birthday, wedding, anniversary, or any occasion worth
+      celebrating, our menu of customized cakes, cupcakes, brownies, and more is designed to make
+      your day truly unforgettable.
+    </p>
+
+    <!-- Feature Cards -->
+    <div class="about-cards">
+      <div class="about-card">
+        <span class="about-card-icon">🎂</span>
+        <h3>Customized cakes</h3>
+        <p>Designed around your vision, made for your occasion.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-card-icon">❤️</span>
+        <h3>Made with care</h3>
+        <p>Every order is finished with attention to detail and love.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-card-icon">🏡</span>
+        <h3>Community trusted</h3>
+        <p>A beloved name in Siniloan for quality and friendly service.</p>
+      </div>
+    </div>
+
+    <!-- Pink Banner -->
+    <div class="about-banner">
+      <p><strong>Designer cakes fit for your celebration!</strong></p>
+      <p>We customize cakes, cupcakes, brownies and other party sweets.</p>
+    </div>
+  </section>
+
+  <!-- ═══ HISTORY SECTION ═══ -->
+  <section class="about-history">
+    <div class="about-history-inner">
+      <h2 class="about-section-title">Our <em>History</em></h2>
+      <p class="about-section-sub">30 years of sweetness in Siniloan</p>
+
+      <div class="about-store-img-wrap">
+        <img src="{{ url_for('static', filename='images/store.jpg') }}"
+             alt="Liza's Cake House store front"
+             class="about-store-img"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="about-store-placeholder">📸 Store photo coming soon</div>
+      </div>
+
+      <div class="about-history-text">
+        <p>
+          Liza's Cake House was established in 1994 in Siniloan. It started as a small home-based
+          baking business created by a passionate baker who loved making cakes for family gatherings
+          and local celebrations.
+        </p>
+        <p>
+          Because many people loved the taste and design of the cakes, the business grew through
+          word-of-mouth and recommendations from satisfied customers — no advertising needed.
+        </p>
+        <p>
+          As the years passed, the shop expanded its menu and began accepting customized cake orders
+          for weddings, debuts, birthdays, and other special events.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STATS + QUOTE SECTION ═══ -->
+  <section class="about-stats-section">
+    <div class="about-divider"></div>
+    <div class="about-stats-body">
+      <div class="about-stats-left">
+        <div class="about-stat">
+          <span class="about-stat-num">30+</span>
+          <span class="about-stat-lbl">Years of baking in Siniloan</span>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat">
+          <span class="about-stat-num">1994</span>
+          <span class="about-stat-lbl">The year it all started</span>
+        </div>
+      </div>
+      <div class="about-stats-sep"></div>
+      <div class="about-stats-right">
+        <blockquote class="about-quote">
+          "From a humble home kitchen to a community staple — we remain dedicated to bringing
+          sweetness and joy to every celebration, big or small."
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<style>
+.about-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 60px 32px 100px;
+  color: #222;
+}
+
+/* ── Hero ── */
+.about-hero { text-align: center; margin-bottom: 72px; }
+
+.about-hero-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 20px;
+  animation: fadeUp 0.6s ease both;
+}
+
+.about-hero-tagline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
+  max-width: 660px;
+  margin: 0 auto 18px;
+  line-height: 1.6;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+
+.about-hero-body {
+  font-size: 0.88rem;
+  color: #666;
+  max-width: 640px;
+  margin: 0 auto 40px;
+  line-height: 1.8;
+  animation: fadeUp 0.6s 0.15s ease both;
+}
+
+/* Feature cards */
+.about-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 44px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.about-card {
+  background: #f7f7f7;
+  border-radius: 16px;
+  padding: 28px 22px;
+  text-align: left;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.about-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px #0000000e;
+}
+
+.about-card-icon { font-size: 1.6rem; display: block; margin-bottom: 12px; }
+
+.about-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #111;
+}
+
+.about-card p {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Pink banner */
+.about-banner {
+  background: #f9c6d8;
+  border-radius: 50px;
+  padding: 24px 40px;
+  animation: fadeUp 0.6s 0.25s ease both;
+}
+
+.about-banner p {
+  font-size: 1rem;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.about-banner strong { font-weight: 800; }
+
+/* ── History ── */
+.about-history {
+  margin-bottom: 64px;
+  animation: fadeUp 0.7s 0.3s ease both;
+}
+
+.about-history-inner { text-align: center; }
+
+.about-section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.about-section-title em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.about-section-sub {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 28px;
+}
+
+.about-store-img-wrap {
+  margin: 0 auto 32px;
+  max-width: 560px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.about-store-img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  display: block;
+  border-radius: 18px;
+}
+
+.about-store-placeholder {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 340px;
+  background: #f5f5f5;
+  color: #bbb;
+  font-size: 0.9rem;
+  border-radius: 18px;
+}
+
+.about-history-text {
+  text-align: left;
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+.about-history-text p {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.9;
+  margin-bottom: 18px;
+}
+
+/* ── Stats + Quote ── */
+.about-stats-section { animation: fadeUp 0.7s 0.4s ease both; }
+
+.about-divider {
+  height: 1px;
+  background: #e8e8e8;
+  margin-bottom: 40px;
+}
+
+.about-stats-body {
+  display: grid;
+  grid-template-columns: 200px 1px 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.about-stats-left { display: flex; flex-direction: column; }
+
+.about-stat { padding: 16px 0; }
+
+.about-stat-num {
+  display: block;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #111;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.about-stat-lbl {
+  font-size: 0.78rem;
+  color: #aaa;
+}
+
+.about-stat-divider {
+  height: 1px;
+  background: #e8e8e8;
+}
+
+.about-stats-sep {
+  width: 1px;
+  height: 120px;
+  background: #e8e8e8;
+  justify-self: center;
+}
+
+.about-quote {
+  font-size: 0.92rem;
+  color: #aaa;
+  font-style: italic;
+  line-height: 1.8;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .about-cards { grid-template-columns: 1fr; }
+  .about-stats-body { grid-template-columns: 1fr; }
+  .about-stats-sep { display: none; }
+  .about-hero-title { font-size: 2rem; }
+  .about-banner { border-radius: 20px; padding: 20px 24px; }
+}
+</style>
+
 {% endblock %}

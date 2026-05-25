@@ -131,13 +131,15 @@ const MONTH = "{{ month_name }}";
 
       // Re-clone title to re-trigger animation
       const newTitle = title.cloneNode(true);
-      newTitle.textContent = `${MONTH} ${day}`;
+      const [monthName, yr] = MONTH.split(' ');
+      newTitle.textContent = `${monthName} ${day}, ${yr}`;
       title.replaceWith(newTitle);
 
-      // Re-clone content container to re-trigger animations
+      // Clear and re-clone content container to re-trigger animations
       const newContent = content.cloneNode(false);
       content.replaceWith(newContent);
-      const activeContent = document.getElementById('ordersContent');
+      content = newContent;
+      const activeContent = content;
 
       orders.forEach(o => {
         const card = document.createElement('div');

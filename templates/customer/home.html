@@ -1,9 +1,363 @@
 {% extends "base.html" %}
-
-{% block title %} Home {% endblock %}
+{% block title %} Home — Liza's Cakehouse {% endblock %}
 
 {% block content %}
-<section>
-  <h1>This is the Customer's Home Page</h1>
+
+<!-- ═══ HERO ═══ -->
+<section class="ch-hero">
+  <div class="blob blob-1" aria-hidden="true"></div>
+  <div class="blob blob-2" aria-hidden="true"></div>
+
+  <div class="ch-hero-inner">
+    <div class="ch-hero-left">
+      <span class="hero-tag">✦ Welcome back, {{ current_user.name.split()[0] }}!</span>
+      <h1 class="title">Your sweetest<br>moments start<br><em>here.</em></h1>
+      <p class="body-text">Ready to place a new order or check on your current ones? We've got everything ready for you.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('bookings.place_booking') }}" class="cta-btn1">+ Book an Event</a>
+        <a href="{{ url_for('gallery.gallery') }}" class="cta-btn2">Browse Gallery →</a>
+      </div>
+    </div>
+
+    <div class="ch-hero-right">
+      <!-- Stat pills -->
+      <div class="ch-stat-pill">
+        <span class="ch-stat-num">{{ pending_count }}</span>
+        <span class="ch-stat-lbl">Pending Order{{ 's' if pending_count != 1 }}</span>
+      </div>
+      <div class="ch-stat-pill ch-stat-green">
+        <span class="ch-stat-num">{{ accepted_count }}</span>
+        <span class="ch-stat-lbl">Accepted Order{{ 's' if accepted_count != 1 }}</span>
+      </div>
+    </div>
+  </div>
 </section>
+
+<!-- ═══ RECENT ORDERS ═══ -->
+<section class="ch-section">
+  <header class="page-header" style="margin-bottom:28px;">
+    <span class="page-label">Your Orders</span>
+    <h2 class="page-title">Recent <em>Bookings</em></h2>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  {% if bookings %}
+  <div class="ch-bookings-list">
+    {% for b in bookings %}
+    <a href="{{ url_for('bookings.booking_detail', booking_id=b.booking_id) }}"
+       class="ch-booking-card status-{{ b.booking_status | lower }}">
+      <div class="ch-bc-left">
+        <span class="ch-bc-avatar">{{ b.flavor[0].upper() }}</span>
+        <div>
+          <span class="ch-bc-flavor">{{ b.flavor }}</span>
+          <span class="ch-bc-date">{{ b.pickup_date.strftime('%B %d, %Y') if b.pickup_date else '—' }}</span>
+        </div>
+      </div>
+      <div class="ch-bc-right">
+        <span class="bki-status" style="margin:0;">{{ b.booking_status }}</span>
+        {% if b.total_price %}
+        <span class="ch-bc-price">₱{{ '%.2f' | format(b.total_price | float) }}</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  <div style="text-align:center; margin-top:20px;">
+    <a href="{{ url_for('main.booking_page') }}" class="cta-btn2">View All Bookings →</a>
+  </div>
+  {% else %}
+  <div class="ch-empty">
+    <div class="ch-empty-icon">🎂</div>
+    <h3>No orders yet!</h3>
+    <p>Ready to make something sweet? Place your first order today.</p>
+    <a href="{{ url_for('bookings.place_booking') }}" class="cta-btn1" style="margin-top:20px;">Book Now</a>
+  </div>
+  {% endif %}
+</section>
+
+<!-- ═══ FEATURED GALLERY ═══ -->
+{% if featured %}
+<section class="ch-section ch-gallery-section">
+  <header class="page-header" style="margin-bottom:28px;">
+    <span class="page-label">Inspiration</span>
+    <h2 class="page-title">Featured <em>Cakes</em></h2>
+    <div class="divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-dot"></span>
+      <span class="divider-line r"></span>
+    </div>
+  </header>
+
+  <div class="ch-gallery-grid">
+    {% for cake in featured %}
+    <div class="ch-gallery-card">
+      {% if cake.image_url %}
+      <img src="{{ cake.image_url }}" alt="{{ cake.design_name }}" class="ch-gallery-img">
+      {% else %}
+      <div class="ch-gallery-placeholder">🎂</div>
+      {% endif %}
+      <div class="ch-gallery-info">
+        <span class="ch-gallery-name">{{ cake.design_name }}</span>
+        <span class="ch-gallery-cat">{{ cake.category }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div style="text-align:center; margin-top:28px;">
+    <a href="{{ url_for('gallery.gallery') }}" class="cta-btn2">See Full Gallery →</a>
+  </div>
+</section>
+{% endif %}
+
+<style>
+/* ── Hero ── */
+.ch-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 60px 48px 72px;
+  background: var(--bg-tint);
+  margin-bottom: 72px;
+}
+
+.ch-hero-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.ch-hero-left .title {
+  font-size: 3rem;
+  line-height: 1.15;
+  color: var(--text);
+  margin: 16px 0 18px;
+}
+
+.ch-hero-left .title em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.ch-hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Stat pills */
+.ch-stat-pill {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 28px;
+  min-width: 180px;
+  box-shadow: 0 4px 20px #ff7db015;
+  animation: fadeUp 0.5s ease both;
+}
+
+.ch-stat-pill.ch-stat-green { border-color: #b8e0b2; }
+
+.ch-stat-num {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: 'François One', sans-serif;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.ch-stat-green .ch-stat-num { color: #5aab52; }
+
+.ch-stat-lbl {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Sections ── */
+.ch-section {
+  max-width: 860px;
+  margin: 0 auto 72px;
+  padding: 0 32px;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+/* ── Booking cards ── */
+.ch-bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ch-booking-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeUp 0.4s ease both;
+}
+
+.ch-booking-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 28px #ff7db030;
+}
+
+.ch-booking-card.status-accepted  { background: #a8d5a2; }
+.ch-booking-card.status-declined,
+.ch-booking-card.status-cancelled { background: #ddd; color: #888; }
+
+.ch-bc-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ch-bc-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ch-bc-flavor {
+  display: block;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.ch-bc-date {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.ch-bc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.ch-bc-price {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* ── Empty state ── */
+.ch-empty {
+  text-align: center;
+  padding: 56px 24px;
+  background: var(--bg-tint);
+  border-radius: 20px;
+  border: 1.5px dashed var(--card);
+}
+
+.ch-empty-icon { font-size: 3rem; margin-bottom: 16px; }
+
+.ch-empty h3 {
+  font-family: 'François One', sans-serif;
+  font-size: 1.3rem;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.ch-empty p { font-size: 0.88rem; color: var(--text-muted); }
+
+/* ── Gallery ── */
+.ch-gallery-section { animation: fadeUp 0.5s 0.18s ease both; }
+
+.ch-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.ch-gallery-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-tint);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ch-gallery-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 28px #ff7db020;
+}
+
+.ch-gallery-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.ch-gallery-placeholder {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  background: var(--card);
+  opacity: 0.4;
+}
+
+.ch-gallery-info { padding: 12px 14px; }
+
+.ch-gallery-name {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ch-gallery-cat {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── Animation ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .ch-hero-inner { grid-template-columns: 1fr; }
+  .ch-hero-right { flex-direction: row; }
+  .ch-hero-left .title { font-size: 2.2rem; }
+  .ch-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .ch-section { padding: 0 16px; }
+}
+</style>
+
 {% endblock %}

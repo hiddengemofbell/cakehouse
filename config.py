@@ -2,16 +2,18 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+def _fix_db_url(url):
+    if not url:
+        return url
+    if url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+    if url.startswith('postgresql://') and '+psycopg2' not in url:
+        url = url.replace('postgresql://', 'postgresql+psycopg2://', 1)
+    return url
+
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
-    
-    _db_url = os.getenv('DATABASE_URL', '')
-    if _db_url.startswith('postgres://'):
-        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
-    if _db_url.startswith('postgresql://') and 'psycopg2' not in _db_url:
-        _db_url = _db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
-    SQLALCHEMY_DATABASE_URI = _db_url
-    
+    SQLALCHEMY_DATABASE_URI = _fix_db_url(os.getenv('DATABASE_URL', ''))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')

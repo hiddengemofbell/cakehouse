@@ -1711,6 +1711,11 @@ footer::after {
     margin-top: 8px;
 }
 
+@keyframes cardFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* Each booking card */
 .booking-card-item {
     display: flex;
@@ -1720,6 +1725,19 @@ footer::after {
     border-radius: 14px;
     background: var(--accent);
     color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    animation: cardFadeIn 0.35s ease both;
+}
+.mybookings-list .booking-card-item:nth-child(1) { animation-delay: 0.05s; }
+.mybookings-list .booking-card-item:nth-child(2) { animation-delay: 0.12s; }
+.mybookings-list .booking-card-item:nth-child(3) { animation-delay: 0.19s; }
+.mybookings-list .booking-card-item:nth-child(4) { animation-delay: 0.26s; }
+.mybookings-list .booking-card-item:nth-child(5) { animation-delay: 0.33s; }
+.booking-card-item:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px #0000001a;
 }
 
 /* Muted colour for cancelled/completed */
@@ -1824,7 +1842,7 @@ footer::after {
 .cal-page {
     max-width: 1100px;
     margin: 0 auto 80px;
-    padding: 0 20px;
+    padding: 40px 48px;
 }
 
 .cal-page-body {
