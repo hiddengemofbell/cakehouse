@@ -2518,6 +2518,24 @@ footer::after {
     margin-bottom: 24px;
 }
 
+.bk-hours-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #fff0f0;
+    border: 1px solid #f5a0a0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    color: #b91c1c;
+    margin-bottom: 16px;
+}
+.bk-hours-error svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #e05555;
+}
+
 .bk-hours-notice {
     display: flex;
     align-items: center;

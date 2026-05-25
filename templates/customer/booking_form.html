@@ -19,7 +19,7 @@
   <!-- Business hours notice -->
   <div class="bk-hours-notice">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>Orders are accepted <strong>Monday – Sunday, 8:00 AM – 10:00 PM</strong> (Philippine Time).</span>
+    <span>Pickup time must be between <strong>8:00 AM and 10:00 PM</strong>.</span>
   </div>
 
   <form class="booking-form"
@@ -156,7 +156,7 @@
         <div class="bk-field">
           <label class="bk-label" for="pickup_time_display">Pickup Time</label>
           <input type="hidden" id="pickup_time" name="pickup_time">
-          <div class="timepicker-wrap">
+          <div class="timepicker-wrap {% if field_errors.pickup_time %}bk-input-error{% endif %}">
             <input class="bk-input datepicker-input" type="text" id="pickup_time_display"
                    placeholder="Select a time" autocomplete="off" readonly>
             <span class="datepicker-icon" aria-hidden="true">
@@ -177,6 +177,9 @@
               <button type="button" class="tp-confirm" id="tpConfirm">Set Time</button>
             </div>
           </div>
+          {% if field_errors.pickup_time %}
+            <span class="bk-field-error">{{ field_errors.pickup_time }}</span>
+          {% endif %}
         </div>
       </div>
 
@@ -438,35 +441,62 @@
     }, 120);
   }
 
-  // Hours 1–12, Minutes 00–59, AM/PM
-  const hours   = Array.from({length: 12}, (_, i) => String(i + 1).padStart(2, '0'));
+  // Hours restricted to valid pickup range: 8 AM–10 PM
+  // AM valid: 8, 9, 10, 11, 12  (8:00 AM – 12:59 AM would be midnight — skip; 12 PM = noon handled by PM)
+  // Actually: AM hours available = 8,9,10,11 | PM hours available = 12,1,2,3,4,5,6,7,8,9,10
+  const amHours = ['08','09','10','11'];
+  const pmHours = ['12','01','02','03','04','05','06','07','08','09','10'];
   const minutes = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
   const ampm    = ['AM', 'PM'];
 
-  function initDrums() {
-    buildDrum(hrDrum,   hours,   11); // default 12
-    buildDrum(minDrum,  minutes, 0);  // default 00
-    buildDrum(ampmDrum, ampm,    0);  // default AM
+  let currentPeriod = 'AM'; // track selected period
+
+  function getHoursForPeriod(period) {
+    return period === 'AM' ? amHours : pmHours;
   }
 
-  [hrDrum, minDrum, ampmDrum].forEach(drum => {
+  function initDrums() {
+    currentPeriod = 'AM';
+    buildDrum(hrDrum,   getHoursForPeriod('AM'), 0); // default 08 AM
+    buildDrum(minDrum,  minutes, 0);                  // default 00
+    buildDrum(ampmDrum, ampm,    0);                  // default AM
+  }
+
+  // When AM/PM changes, rebuild the hour drum with the right set
+  ampmDrum.addEventListener('scroll', () => {
+    clearTimeout(ampmDrum._snapTimer);
+    ampmDrum._snapTimer = setTimeout(() => {
+      snapDrum(ampmDrum);
+      updateActive(ampmDrum);
+      const apIdx = getSelectedIndex(ampmDrum);
+      const newPeriod = ampm[apIdx] || 'AM';
+      if (newPeriod !== currentPeriod) {
+        currentPeriod = newPeriod;
+        buildDrum(hrDrum, getHoursForPeriod(newPeriod), 0);
+      }
+    }, 120);
+  });
+
+  [hrDrum, minDrum].forEach(drum => {
     drum.addEventListener('scroll', () => onDrumScroll(drum));
   });
 
   document.getElementById('tpConfirm').addEventListener('click', () => {
-    const hIdx    = getSelectedIndex(hrDrum);
-    const mIdx    = getSelectedIndex(minDrum);
-    const apIdx   = getSelectedIndex(ampmDrum);
+    const hIdx   = getSelectedIndex(hrDrum);
+    const mIdx   = getSelectedIndex(minDrum);
+    const apIdx  = getSelectedIndex(ampmDrum);
 
-    const h12  = hIdx + 1;
-    const min  = mIdx;
-    const period = ampm[apIdx] || 'AM';
+    const period  = ampm[apIdx] || 'AM';
+    const hourStr = getHoursForPeriod(period)[hIdx] || '08';
+    const minStr  = minutes[mIdx] || '00';
+    const h12     = parseInt(hourStr, 10);
 
-    tpDisplay.value = `${String(h12).padStart(2,'0')}:${String(min).padStart(2,'0')} ${period}`;
+    tpDisplay.value = `${hourStr}:${minStr} ${period}`;
 
+    // Convert to 24h for server-side validation
     let h24 = h12 % 12;
     if (period === 'PM') h24 += 12;
-    tpHidden.value = `${String(h24).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+    tpHidden.value = `${String(h24).padStart(2,'0')}:${minStr}`;
     tp.hidden = true;
   });
 

@@ -10,7 +10,7 @@ bookings_bp = Blueprint('bookings', __name__)
 @login_required
 def place_booking():
     if request.method == 'POST':
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime
 
         # Collect all form values so we can send them back if there's an error
         fd = {k: request.form.get(k, '') for k in request.form}
@@ -27,16 +27,20 @@ def place_booking():
         pickup_time = fd.get('pickup_time', '').strip()
         pickup_date_str = fd.get('pickup_date', '').strip()
 
+        # ── Pickup time range check (must be 8:00 AM – 10:00 PM) ──
+        if pickup_time:
+            try:
+                ph, pm = map(int, pickup_time.split(':'))
+                total_minutes = ph * 60 + pm
+                if total_minutes < 8 * 60 or total_minutes > 22 * 60:
+                    field_errors['pickup_time'] = 'Pickup time must be between 8:00 AM and 10:00 PM.'
+            except ValueError:
+                field_errors['pickup_time'] = 'Invalid pickup time.'
+
         # ── Phone validation ──
         _, phone_errors = validate(BookingSchema, {'phone': phone})
         if phone_errors:
             field_errors['phone'] = phone_errors[0]
-
-        # ── Business hours check (8 AM – 10 PM Philippine Time) ──
-        PH_TZ = timezone(timedelta(hours=8))
-        now_ph = datetime.now(PH_TZ)
-        if now_ph.hour < 8 or now_ph.hour >= 22:
-            field_errors['pickup_date'] = 'We only accept bookings from 8:00 AM – 10:00 PM (PH Time).'
 
         # ── Pickup date + daily limit check ──
         pickup_date = None
