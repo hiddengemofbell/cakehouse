@@ -3025,10 +3025,11 @@ footer::after {
 
     /* How it works */
     .steps {
-        flex-direction: column;
-        align-items: center;
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin: 0 auto;
     }
-    .step-card { max-width: 480px; width: 100%; }
+    .step-card { width: 100%; }
 
     /* Why choose us */
     .cards {
