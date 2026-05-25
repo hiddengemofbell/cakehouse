@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from modules import db
 from modules.models import User
+from modules.validators import RegisterSchema, validate
 
 auth = Blueprint('auth', __name__)
 
@@ -14,17 +15,25 @@ def register():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
-        if not name or not email or not password:
-            flash('Please fill in all fields.', 'error')
+        # ── Pydantic validation ──
+        _, errors = validate(RegisterSchema, {
+            'name': name or '',
+            'email': email or '',
+            'password': password or '',
+        })
+        if errors:
+            for e in errors:
+                flash(e, 'error')
             return redirect(url_for('auth.register'))
 
         if password != confirm_password:
             flash('Passwords do not match.', 'error')
             return redirect(url_for('auth.register'))
 
+        # ── Duplicate email check ──
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            flash('Email already exists.', 'error')
+            flash('An account with that email already exists.', 'error')
             return redirect(url_for('auth.register'))
 
         hashed_password = generate_password_hash(password)

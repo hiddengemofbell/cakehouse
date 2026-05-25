@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from modules import db
 from modules.models import Booking, CakeProgress, Feedback
+from modules.validators import BookingSchema, validate
 
 bookings_bp = Blueprint('bookings', __name__)
 
@@ -29,6 +30,15 @@ def place_booking():
         if pickup_time:  special_notes_parts.append(f"Pickup time: {pickup_time}")
         if extra_notes:  special_notes_parts.append(f"Notes: {extra_notes}")
         special_notes = " | ".join(special_notes_parts)
+
+        # ── Pydantic validation ──
+        _, errors = validate(BookingSchema, {
+            'phone': phone,
+        })
+        if errors:
+            for e in errors:
+                flash(e, 'error')
+            return redirect(url_for('bookings.place_booking'))
 
         # Check 3 orders per day limit
         from datetime import date as date_type, datetime

@@ -2903,6 +2903,209 @@ footer::after {
 }
 
 
+/* ══════════════════════════════════════════════
+   RESPONSIVE — MOBILE & TABLET
+   Breakpoints:
+     768px  → tablet (iPad)
+     480px  → mobile (phone)
+   ══════════════════════════════════════════════ */
+
+/* ── Hamburger button ── */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    z-index: 200;
+}
+.hamburger span {
+    display: block;
+    width: 24px;
+    height: 2.5px;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+/* ── Mobile drawer ── */
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0000004d;
+    z-index: 300;
+}
+.mobile-nav-overlay.open { display: block; }
+
+.mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 260px;
+    height: 100dvh;
+    background: #fff;
+    z-index: 400;
+    padding: 24px 20px;
+    box-shadow: -4px 0 24px #0000001a;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+.mobile-nav-drawer.open { right: 0; }
+
+.mobile-nav-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    float: right;
+    margin-bottom: 24px;
+}
+
+.mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    clear: both;
+}
+
+.mobile-nav-links a {
+    display: block;
+    padding: 12px 14px;
+    font-family: 'François One', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 10px;
+    transition: background 0.15s;
+}
+.mobile-nav-links a:hover { background: var(--bg-tint); }
+
+.mobile-nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+}
+
+.mobile-nav-logout {
+    color: var(--accent-dark) !important;
+}
+
+.mobile-nav-signup {
+    background: var(--accent) !important;
+    color: #fff !important;
+    text-align: center;
+    border-radius: 50px !important;
+}
+
+/* ── TABLET (≤ 768px) ── */
+@media (max-width: 768px) {
+
+    /* Header */
+    .header-container { padding: 10px 20px; }
+    .header-container nav.header-text { display: none; }
+    .hamburger { display: flex; }
+
+    /* Hero */
+    .hero-container {
+        flex-direction: column;
+        padding: 40px 24px 32px;
+        gap: 32px;
+        text-align: center;
+    }
+    .hero-left { align-items: center; max-width: 100%; }
+    .hero-right { width: 100%; display: flex; justify-content: center; }
+    .hero-img-wrap { width: 280px; }
+    .title { font-size: 40px; }
+    .hero-actions { justify-content: center; }
+
+    /* How it works */
+    .steps {
+        flex-direction: column;
+        align-items: center;
+    }
+    .step-card { max-width: 480px; width: 100%; }
+
+    /* Why choose us */
+    .cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Footer */
+    footer { padding: 40px 24px 24px; }
+    .footer-top { flex-direction: column; gap: 28px; text-align: center; }
+    .contact-list { align-items: center; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    .footer-nav { flex-wrap: wrap; justify-content: center; }
+
+    /* Gallery */
+    .gllry { padding: 32px 20px 60px; }
+
+    /* Calendar */
+    .cal-page { padding: 32px 16px; }
+    .cal-page-body { grid-template-columns: 1fr; }
+
+    /* Manage bookings */
+    .mgmt-section { padding: 0 16px; }
+    .bkmgmt-details { grid-template-columns: 1fr 1fr; }
+
+    /* Control panel */
+    .um-section { padding: 32px 20px; }
+
+    /* About page */
+    .about-cards { grid-template-columns: 1fr; }
+    .about-stats-body { grid-template-columns: 1fr; }
+    .about-stats-sep { display: none; }
+    .about-banner { border-radius: 20px; padding: 20px 24px; }
+
+    /* Customer home */
+    .ch-hero { padding: 40px 20px 48px; }
+    .ch-hero-inner { grid-template-columns: 1fr; gap: 28px; }
+    .ch-hero-right { flex-direction: row; flex-wrap: wrap; }
+    .ch-stats { grid-template-columns: 1fr 1fr; }
+    .ch-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .ch-section { padding: 0 16px; }
+}
+
+/* ── MOBILE (≤ 480px) ── */
+@media (max-width: 480px) {
+
+    /* Header */
+    .brand-name-header { display: none; }
+
+    /* Hero */
+    .title { font-size: 32px; }
+    .hero-img-wrap { width: 220px; }
+    .cta-btn1, .cta-btn2 { padding: 12px 24px; font-size: 12px; }
+
+    /* Why choose us */
+    .cards { grid-template-columns: 1fr; }
+
+    /* Booking form */
+    .bk-row { grid-template-columns: 1fr; }
+    .cake-type-grid { grid-template-columns: 1fr 1fr; }
+    .booking-card { padding: 20px 16px; }
+
+    /* My bookings */
+    .mybookings-section { padding: 0 16px; }
+
+    /* Calendar */
+    .cal-page-grid { gap: 4px; }
+    .cal-page-day { min-height: 44px; font-size: 0.75rem; }
+
+    /* Stats */
+    .ch-stats { grid-template-columns: 1fr; }
+    .ch-gallery-grid { grid-template-columns: 1fr 1fr; }
+
+    /* About */
+    .about-page { padding: 40px 16px 60px; }
+    .about-hero-title { font-size: 1.8rem; }
+}
+
 /* ── 11. DAISYUI OVERRIDES ── */
 /*
    DaisyUI sets its own background on .input elements.
