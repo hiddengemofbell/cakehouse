@@ -33,7 +33,7 @@
 <!-- ── HOW IT WORKS ── -->
 <section class="sc2" aria-labelledby="how-it-works-title">
     <div class="wf1-container">
-        <header class="section-header">
+        <header class="section-header reveal">
             <span class="section-label">Simple & Sweet</span>
             <h2 class="section-title" id="how-it-works-title">How It <em>Works</em></h2>
             <div class="divider" aria-hidden="true">
@@ -44,7 +44,7 @@
         </header>
 
         <ol class="steps">
-            <li class="step-card">
+            <li class="step-card reveal" style="transition-delay: 0.05s;">
                 <div class="step-icon-wrap" aria-hidden="true">📋</div>
                 <div class="step-body">
                     <span class="step-number" aria-hidden="true">01</span>
@@ -52,7 +52,7 @@
                     <p class="step-desc">Browse our menu or reach out with a custom request. Tell us your flavor, design, and occasion — we'll take it from there.</p>
                 </div>
             </li>
-            <li class="step-card">
+            <li class="step-card reveal" style="transition-delay: 0.18s;">
                 <div class="step-icon-wrap" aria-hidden="true">🎨</div>
                 <div class="step-body">
                     <span class="step-number" aria-hidden="true">02</span>
@@ -60,7 +60,7 @@
                     <p class="step-desc">Our baker gets to work crafting your cake fresh from scratch — every detail made with care, from the layers to the finishing touches.</p>
                 </div>
             </li>
-            <li class="step-card">
+            <li class="step-card reveal" style="transition-delay: 0.31s;">
                 <div class="step-icon-wrap" aria-hidden="true">🎉</div>
                 <div class="step-body">
                     <span class="step-number" aria-hidden="true">03</span>
@@ -75,7 +75,7 @@
 <!-- ── WHY CHOOSE US ── -->
 <section class="sc3" aria-labelledby="why-choose-us-title">
     <div class="wf3">
-        <header class="section-header">
+        <header class="section-header reveal">
             <span class="section-label">Our Promise</span>
             <h2 class="section-title" id="why-choose-us-title">Why Choose <em>Us?</em></h2>
             <div class="divider" aria-hidden="true">
@@ -86,25 +86,25 @@
         </header>
 
         <ul class="cards">
-            <li class="card">
+            <li class="card reveal" style="transition-delay: 0.05s;">
                 <div class="card-icon" aria-hidden="true">🎂</div>
                 <h3 class="card-title">Handcrafted with Love</h3>
                 <p class="card-desc">Every cake is made from scratch using only the finest ingredients. No shortcuts, no mixes — just pure homemade goodness baked into every layer.</p>
                 <span class="card-number" aria-hidden="true">01</span>
             </li>
-            <li class="card">
+            <li class="card reveal" style="transition-delay: 0.15s;">
                 <div class="card-icon" aria-hidden="true">✨</div>
                 <h3 class="card-title">Custom Designs</h3>
                 <p class="card-desc">From intimate birthdays to grand celebrations, we bring your vision to life. Share your idea and we'll craft a cake that's uniquely yours.</p>
                 <span class="card-number" aria-hidden="true">02</span>
             </li>
-            <li class="card">
+            <li class="card reveal" style="transition-delay: 0.25s;">
                 <div class="card-icon" aria-hidden="true">🌸</div>
                 <h3 class="card-title">Fresh Every Order</h3>
                 <p class="card-desc">We never pre-bake in bulk. Each order is prepared fresh to ensure the best taste, texture, and presentation on your special day.</p>
                 <span class="card-number" aria-hidden="true">03</span>
             </li>
-            <li class="card">
+            <li class="card reveal" style="transition-delay: 0.35s;">
                 <div class="card-icon" aria-hidden="true">💌</div>
                 <h3 class="card-title">Heartfelt Service</h3>
                 <p class="card-desc">We treat every order like it matters — because it does. Expect warm, personal service from your first message to final delivery.</p>
@@ -116,7 +116,7 @@
 
 <!-- ── CTA BANNER ── -->
 <section class="cta-banner color-change-2x" aria-label="Call to action">
-    <div class="cta-banner-inner">
+    <div class="cta-banner-inner reveal">
         <h2>Ready to order your dream cake?</h2>
         <p>Let's make your celebration extra special — one slice at a time.</p>
 
@@ -127,5 +127,19 @@
         {% endif %}
     </div>
 </section>
+
+<script>
+    // Scroll-reveal: watch all .reveal elements and add .visible when in view
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target); // only animate once
+            }
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+</script>
 
 {% endblock %}

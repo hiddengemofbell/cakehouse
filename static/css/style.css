@@ -229,6 +229,36 @@ h1, h2, h3, h4 {
     50%       { transform: translateY(-14px); }
 }
 
+/* Hero entrance — fade up from below */
+@keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero image entrance — fade in + scale up */
+@keyframes heroImgIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* Scroll-reveal — elements start hidden, JS adds .visible */
+.reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hero staggered entrance */
+.hero-tag    { animation: heroFadeUp 0.6s ease both; animation-delay: 0.1s; }
+.hero-left h1 { animation: heroFadeUp 0.65s ease both; animation-delay: 0.25s; }
+.hero-left .body-text { animation: heroFadeUp 0.65s ease both; animation-delay: 0.4s; }
+.hero-actions { animation: heroFadeUp 0.65s ease both; animation-delay: 0.55s; }
+.hero-img-wrap { animation: heroImgIn 0.8s cubic-bezier(0.22,1,0.36,1) both; animation-delay: 0.35s; }
+
 /* Color pulse — used on the CTA banner background */
 .color-change-2x {
     -webkit-animation: color-change-2x 2s linear infinite alternate both;
@@ -2486,6 +2516,23 @@ footer::after {
     border-radius: 16px;
     padding: 32px 28px;
     margin-bottom: 24px;
+}
+
+.bk-hours-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff8f0;
+    border: 1px solid #f5c28a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    color: #7a4a1e;
+    margin-bottom: 20px;
+}
+.bk-hours-notice svg {
+    flex-shrink: 0;
+    color: #e07b2a;
 }
 
 .booking-section-title {

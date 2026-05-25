@@ -40,8 +40,15 @@ def place_booking():
                 flash(e, 'error')
             return redirect(url_for('bookings.place_booking'))
 
+        # ── Business hours check (8 AM – 10 PM Philippine Time) ──
+        from datetime import date as date_type, datetime, timezone, timedelta
+        PH_TZ = timezone(timedelta(hours=8))
+        now_ph = datetime.now(PH_TZ)
+        if now_ph.hour < 8 or now_ph.hour >= 22:
+            flash('Sorry! We only accept bookings from 8:00 AM to 10:00 PM (Philippine Time).', 'error')
+            return redirect(url_for('bookings.place_booking'))
+
         # Check 3 orders per day limit
-        from datetime import date as date_type, datetime
         pickup_date_str = request.form.get('pickup_date')
         pickup_date = datetime.strptime(pickup_date_str, '%Y-%m-%d').date()
         existing_bookings = Booking.query.filter_by(
