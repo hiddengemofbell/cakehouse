@@ -3330,7 +3330,7 @@ footer::after {
     .footer-top { flex-direction: column; gap: 28px; text-align: center; }
     .contact-list { align-items: center; }
     .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-    .footer-nav { flex-wrap: wrap; justify-content: center; }
+    .footer-nav { flex-wrap: wrap; justify-content: center; gap: 16px; }
 
     /* Gallery */
     .gllry { padding: 32px 20px 60px; }
@@ -3395,6 +3395,11 @@ footer::after {
     /* About */
     .about-page { padding: 40px 16px 60px; }
     .about-hero-title { font-size: 1.8rem; }
+
+    /* Footer */
+    .footer-nav { gap: 10px 20px; }
+    .footer-nav a { font-size: 11px; letter-spacing: 1.2px; }
+    .copyright { font-size: 10px; }
 }
 
 /* ── 11. DAISYUI OVERRIDES ── */

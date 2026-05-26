@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us — Liza's Cakehouse{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+
+  <div class="contact-header">
+    <h1>Get in <em>Touch</em></h1>
+    <p>We'd love to hear from you. Reach out through any of the channels below.</p>
+  </div>
+
+  <div class="contact-grid">
+
+    <div class="contact-card">
+      <div class="contact-card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+      <h3>Visit Us</h3>
+      <p>51 M Acevida<br>Siniloan, Laguna</p>
+      <a href="https://maps.google.com/?q=Siniloan,Laguna" target="_blank" rel="noopener noreferrer" class="contact-link">Open in Maps →</a>
+    </div>
+
+    <div class="contact-card">
+      <div class="contact-card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <polyline points="2,4 12,13 22,4"/>
+        </svg>
+      </div>
+      <h3>Email Us</h3>
+      <p>We'll get back to you<br>as soon as possible.</p>
+      <a href="mailto:lizascakehouse@yahoo.com" class="contact-link">lizascakehouse@yahoo.com →</a>
+    </div>
+
+    <div class="contact-card">
+      <div class="contact-card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+        </svg>
+      </div>
+      <h3>Follow Us</h3>
+      <p>Stay updated with our latest<br>designs and announcements.</p>
+      <a href="https://www.facebook.com/LizasCakeHouse/" target="_blank" rel="noopener noreferrer" class="contact-link">Liza's CakeHouse on Facebook →</a>
+    </div>
+
+  </div>
+
+  <div class="contact-note">
+    <p>
+      <strong>Placing an order?</strong> You can book directly through our
+      <a href="{{ url_for('auth.login') }}">online booking system</a> — log in or create an account to get started.
+    </p>
+  </div>
+
+</div>
+
+<style>
+.contact-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 64px 32px 100px;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.contact-header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 14px;
+}
+
+.contact-header h1 em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.contact-header p {
+  font-size: 0.95rem;
+  color: #777;
+  line-height: 1.7;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.contact-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 36px 28px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.07);
+}
+
+.contact-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: var(--accent);
+}
+
+.contact-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 10px;
+}
+
+.contact-card p {
+  font-size: 0.85rem;
+  color: #777;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.contact-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: opacity 0.2s;
+}
+
+.contact-link:hover { opacity: 0.7; }
+
+.contact-note {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 24px 32px;
+  text-align: center;
+  border-left: 3px solid var(--accent);
+}
+
+.contact-note p {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.contact-note a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.contact-note a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto 48px; }
+  .contact-page { padding: 48px 20px 80px; }
+  .contact-header h1 { font-size: 1.9rem; }
+}
+
+@media (max-width: 480px) {
+  .contact-note { padding: 20px; }
+}
+</style>
+{% endblock %}

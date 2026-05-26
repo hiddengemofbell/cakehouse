@@ -15,6 +15,18 @@ def landing():
 def AboutUs():
     return render_template('customer/about_us.html')
 
+@main_bp.route('/contact')
+def contact():
+    return render_template('customer/contact.html')
+
+@main_bp.route('/faqs')
+def faqs():
+    return render_template('customer/faqs.html')
+
+@main_bp.route('/privacy')
+def privacy():
+    return render_template('customer/privacy.html')
+
 # Dashboard redirect based on user role
 @main_bp.route('/dashboard')
 def dashboard():
