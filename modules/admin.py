@@ -7,7 +7,7 @@ import json
 import cloudinary
 import cloudinary.uploader
 from modules import db
-from modules.models import User, Booking, Cake, StaffPermission, Category, CakeReaction
+from modules.models import User, Booking, Cake, StaffPermission, Category, CakeReaction, BookingSpec
 from modules.decorators import admin_required
 
 # Roles config file
@@ -60,16 +60,16 @@ def dashboard():
         Booking.pickup_date.label('event_date'),
         Booking.booking_status.label('status'),
         Booking.total_price.label('total'),
-        Booking.flavor,
-        Booking.size,
-        Booking.theme,
-        Booking.layers,
-        Booking.motif_color,
-        Booking.phone,
-        Booking.cake_message,
+        BookingSpec.flavor,
+        BookingSpec.size,
+        BookingSpec.theme,
+        BookingSpec.layers,
+        BookingSpec.motif_color,
+        BookingSpec.phone,
+        BookingSpec.cake_message,
         Booking.pickup_time,
-        Booking.notes,
-        Booking.quantity,
+        BookingSpec.notes,
+        BookingSpec.quantity,
         Booking.budget,
         Booking.pay_method,
         Booking.created_at
@@ -140,9 +140,9 @@ def dashboard():
 
     # ── Top 5 most ordered flavors ──
     top_flavors = db.session.query(
-        Booking.flavor,
+        BookingSpec.flavor,
         func.count(Booking.booking_id).label('count')
-    ).group_by(Booking.flavor)\
+    ).group_by(BookingSpec.flavor)\
      .order_by(func.count(Booking.booking_id).desc())\
      .limit(5).all()
 
@@ -150,9 +150,9 @@ def dashboard():
 
     # ── Top 5 most ordered sizes ──
     top_sizes = db.session.query(
-        Booking.size,
+        BookingSpec.size,
         func.count(Booking.booking_id).label('count')
-    ).group_by(Booking.size)\
+    ).group_by(BookingSpec.size)\
      .order_by(func.count(Booking.booking_id).desc())\
      .limit(5).all()
 
