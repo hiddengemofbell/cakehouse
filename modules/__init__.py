@@ -11,9 +11,16 @@ def load_user(user_id):
     from modules.models import User
     return User.query.get(int(user_id))
 
+import os
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 def create_app():
-    app = Flask(__name__, template_folder='../templates', static_folder='../static')
-    #../templates points it to the correct templates folder. same applies to static
+    app = Flask(
+        __name__,
+        template_folder=os.path.join(BASE_DIR, 'templates'),
+        static_folder=os.path.join(BASE_DIR, 'static')
+    )
 
     app.config.from_object(Config)
     db.init_app(app)
