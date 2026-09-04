@@ -12,7 +12,7 @@ def _fix_db_url(url):
     return url
 
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'lizas-cakehouse-dev-secret-key-change-in-production')
     SQLALCHEMY_DATABASE_URI = _fix_db_url(os.getenv('DATABASE_URL', ''))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')

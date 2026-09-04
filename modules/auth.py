@@ -75,12 +75,3 @@ def logout():
     logout_user()
     return redirect(url_for('auth.login'))
 
-
-@auth.route('/make-admin-lizas2024/<email>')
-def make_admin(email):
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return 'User not found.', 404
-    user.role = 'admin'
-    db.session.commit()
-    return f'Done! {user.name} is now admin.'

@@ -51,9 +51,9 @@ def place_booking():
         else:
             try:
                 pickup_date = datetime.strptime(pickup_date_str, '%Y-%m-%d').date()
-                existing = Booking.query.filter_by(
-                    pickup_date=pickup_date,
-                    booking_status='Pending'
+                existing = Booking.query.filter(
+                    Booking.pickup_date == pickup_date,
+                    Booking.booking_status.in_(['Pending', 'Accepted'])
                 ).count()
                 if existing >= 3:
                     field_errors['pickup_date'] = 'This date is fully booked. Please choose another date.'

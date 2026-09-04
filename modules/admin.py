@@ -27,15 +27,11 @@ def load_roles():
 
 def save_roles(roles):
     """Save roles to config"""
-    with open(ROLES_FILE, 'w') as f:
-        json.dump({'roles': roles}, f)
-
-# Configure Cloudinary directly from env vars (bypasses app.config timing issues)
-cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.getenv('CLOUDINARY_API_KEY'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET')
-)
+    try:
+        with open(ROLES_FILE, 'w') as f:
+            json.dump({'roles': roles}, f, indent=4)
+    except Exception as e:
+        print(f"Warning: Failed to persist roles to {ROLES_FILE}: {e}")
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -75,6 +71,7 @@ def dashboard():
         Booking.created_at
     ).join(User, Booking.user_id == User.user_id)\
      .outerjoin(Cake, Booking.cake_id == Cake.cake_id)\
+     .outerjoin(BookingSpec, Booking.booking_id == BookingSpec.booking_id)\
      .order_by(Booking.created_at.desc()).limit(20).all()
 
     recent_orders = [
@@ -142,7 +139,8 @@ def dashboard():
     top_flavors = db.session.query(
         BookingSpec.flavor,
         func.count(Booking.booking_id).label('count')
-    ).group_by(BookingSpec.flavor)\
+    ).join(Booking, BookingSpec.booking_id == Booking.booking_id)\
+     .group_by(BookingSpec.flavor)\
      .order_by(func.count(Booking.booking_id).desc())\
      .limit(5).all()
 
@@ -152,7 +150,8 @@ def dashboard():
     top_sizes = db.session.query(
         BookingSpec.size,
         func.count(Booking.booking_id).label('count')
-    ).group_by(BookingSpec.size)\
+    ).join(Booking, BookingSpec.booking_id == Booking.booking_id)\
+     .group_by(BookingSpec.size)\
      .order_by(func.count(Booking.booking_id).desc())\
      .limit(5).all()
 

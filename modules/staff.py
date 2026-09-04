@@ -4,14 +4,9 @@ import os
 import cloudinary
 import cloudinary.uploader
 from modules import db
-from modules.models import User, Booking, Cake, StaffPermission, Category
+from modules.models import User, Booking, Cake, StaffPermission, Category, BookingSpec
 from modules.decorators import staff_required
-
-cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.getenv('CLOUDINARY_API_KEY'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET')
-)
+import os
 
 staff_bp = Blueprint('staff', __name__)
 
@@ -71,9 +66,10 @@ def dashboard():
 
     # Top 5 flavors
     top_flavors = db.session.query(
-        Booking.flavor,
+        BookingSpec.flavor,
         func.count(Booking.booking_id).label('count')
-    ).group_by(Booking.flavor)\
+    ).join(Booking, BookingSpec.booking_id == Booking.booking_id)\
+     .group_by(BookingSpec.flavor)\
      .order_by(func.count(Booking.booking_id).desc())\
      .limit(5).all()
     top_flavors = [{'flavor': r.flavor, 'count': r.count} for r in top_flavors]
@@ -157,9 +153,10 @@ def bookings():
 
     # Top 5 flavors
     top_flavors = db.session.query(
-        Booking.flavor,
+        BookingSpec.flavor,
         func.count(Booking.booking_id).label('count')
-    ).group_by(Booking.flavor)\
+    ).join(Booking, BookingSpec.booking_id == Booking.booking_id)\
+     .group_by(BookingSpec.flavor)\
      .order_by(func.count(Booking.booking_id).desc())\
      .limit(5).all()
     top_flavors = [{'flavor': r.flavor, 'count': r.count} for r in top_flavors]
